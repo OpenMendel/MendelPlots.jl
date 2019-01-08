@@ -1,4 +1,5 @@
 name = "MendelPlots"
+uuid = "7ab2ea78-72dd-4c03-85d8-fc2b0db252af"
 keywords = ["GWAS", "plots", "genetics plots"]
 author = ["Chris German <germc3@ucla.edu>", "Hua Zhou <huazhou@ucla.edu>", "OpenMendel Team"]
 version = "0.1.0"
