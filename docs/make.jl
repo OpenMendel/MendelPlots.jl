@@ -4,9 +4,8 @@ ENV["DOCUMENTER_DEBUG"] = "true"
 
 makedocs(
     format = :html,
-    modules = [MendelPlots],
-    clean = false,
-    sitename = "MendelPlots.jl",
+    sitename = "MendelPlots",
+    modules = [MendelPlots]
 )
 
 deploydocs(
