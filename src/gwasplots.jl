@@ -152,15 +152,15 @@ higher resolution. Default dpi is 350.
 
 - `linecolor::AbstractString`: Color for significance line. Default is 'deepskyblue1'. 
 """
-function manhattan(df::DataFrame, titles::AbstractString = "Manhattan Plot",
+function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
     outfile::AbstractString = "manhattan.png",
     dpi::Int64 = 350, xlabel::AbstractString = "Chromosome",
-    ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = nothing,
-    signifline::Union{Float64, Int64} = nothing, linecolor = "deepskyblue1"; kwargs...)
+    ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = 0,
+    signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", kwargs...)
 
     df[:SNPnumber] = collect(1:size(df)[1])
     df[:log10pval] = -log10.(df[:pval])
-    if typeof(ymax) == Nothing
+    if ymax == 0
         ymax = ceil(maximum(df[:log10pval])) + 2.5
     end
     yticks = collect(0:2.5:ymax)
@@ -175,7 +175,7 @@ function manhattan(df::DataFrame, titles::AbstractString = "Manhattan Plot",
         global counter = counter + 1
     end
 
-    if typeof(signifline) == Nothing
+    if signifline == -1
         signifline = -log10(0.05 / length(df[:chr]))
     end
 
