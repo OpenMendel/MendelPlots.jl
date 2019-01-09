@@ -39,49 +39,6 @@ using TextParse, DataFrames, MendelPlots
     └ @ Compose /Users/christophergerman/.julia/packages/Compose/pDFGJ/src/Compose.jl:165
     ┌ Info: Loading DataFrames support into Gadfly.jl
     └ @ Gadfly /Users/christophergerman/.julia/packages/Gadfly/09PWZ/src/mapping.jl:228
-    ┌ Warning: [TEMPORARY WORKAROUND, pangolayout] for plotting with Gadfly.jl, see https://github.com/GiovineItalia/Gadfly.jl/issues/1206
-    └ @ Compose /Users/christophergerman/.julia/packages/Compose/pDFGJ/src/pango.jl:67
-    ┌ Warning: Error requiring Fontconfig from Compose:
-    │ LoadError: UndefVarError: pango_cairo_ctx not defined
-    │ Stacktrace:
-    │  [1] Compose.PangoLayout() at /Users/christophergerman/.julia/packages/Compose/pDFGJ/src/pango.jl:59
-    │  [2] top-level scope at none:0
-    │  [3] include at ./boot.jl:317 [inlined]
-    │  [4] include_relative(::Module, ::String) at ./loading.jl:1044
-    │  [5] include at ./sysimg.jl:29 [inlined]
-    │  [6] include(::String) at /Users/christophergerman/.julia/packages/Compose/pDFGJ/src/Compose.jl:1
-    │  [7] top-level scope at /Users/christophergerman/.julia/packages/Compose/pDFGJ/src/Compose.jl:173
-    │  [8] eval at ./boot.jl:319 [inlined]
-    │  [9] eval at /Users/christophergerman/.julia/packages/Compose/pDFGJ/src/Compose.jl:1 [inlined]
-    │  [10] (::getfield(Compose, Symbol("##118#124")))() at /Users/christophergerman/.julia/packages/Requires/9Jse8/src/require.jl:67
-    │  [11] err(::getfield(Compose, Symbol("##118#124")), ::Module, ::String) at /Users/christophergerman/.julia/packages/Requires/9Jse8/src/require.jl:38
-    │  [12] #117 at /Users/christophergerman/.julia/packages/Requires/9Jse8/src/require.jl:66 [inlined]
-    │  [13] withpath(::getfield(Compose, Symbol("##117#123")), ::String) at /Users/christophergerman/.julia/packages/Requires/9Jse8/src/require.jl:28
-    │  [14] (::getfield(Compose, Symbol("##116#122")))() at /Users/christophergerman/.julia/packages/Requires/9Jse8/src/require.jl:65
-    │  [15] #invokelatest#1 at ./essentials.jl:697 [inlined]
-    │  [16] invokelatest at ./essentials.jl:696 [inlined]
-    │  [17] #3 at /Users/christophergerman/.julia/packages/Requires/9Jse8/src/require.jl:19 [inlined]
-    │  [18] iterate at ./generator.jl:47 [inlined]
-    │  [19] _collect(::Array{Function,1}, ::Base.Generator{Array{Function,1},getfield(Requires, Symbol("##3#4"))}, ::Base.EltypeUnknown, ::Base.HasShape{1}) at ./array.jl:632
-    │  [20] map at ./array.jl:561 [inlined]
-    │  [21] loadpkg(::Base.PkgId) at /Users/christophergerman/.julia/packages/Requires/9Jse8/src/require.jl:19
-    │  [22] #invokelatest#1 at ./essentials.jl:697 [inlined]
-    │  [23] invokelatest at ./essentials.jl:696 [inlined]
-    │  [24] _tryrequire_from_serialized(::Base.PkgId, ::UInt64, ::String) at ./loading.jl:651
-    │  [25] _require_search_from_serialized(::Base.PkgId, ::String) at ./loading.jl:702
-    │  [26] _require(::Base.PkgId) at ./loading.jl:937
-    │  [27] require(::Base.PkgId) at ./loading.jl:858
-    │  [28] require(::Module, ::Symbol) at ./loading.jl:853
-    │  [29] top-level scope at In[2]:1
-    │  [30] eval at ./boot.jl:319 [inlined]
-    │  [31] softscope_include_string(::Module, ::String, ::String) at /Users/christophergerman/.julia/packages/SoftGlobalScope/8FGzf/src/SoftGlobalScope.jl:207
-    │  [32] execute_request(::ZMQ.Socket, ::IJulia.Msg) at /Users/christophergerman/.julia/packages/IJulia/DL02A/src/execute_request.jl:69
-    │  [33] #invokelatest#1 at ./essentials.jl:697 [inlined]
-    │  [34] invokelatest at ./essentials.jl:696 [inlined]
-    │  [35] eventloop(::ZMQ.Socket) at /Users/christophergerman/.julia/packages/IJulia/DL02A/src/eventloop.jl:8
-    │  [36] (::getfield(IJulia, Symbol("##12#15")))() at ./task.jl:259
-    │ in expression starting at /Users/christophergerman/.julia/packages/Compose/pDFGJ/src/pango.jl:68
-    └ @ Requires /Users/christophergerman/.julia/packages/Requires/9Jse8/src/require.jl:40
 
 
 ## Example dataset
@@ -171,5 +128,7 @@ There are several other options that the `qq` and `manhattan` functions take, re
 
 
 ```julia
-
+#clean up files 
+rm("manhattan.png")
+rm("qqplot.png")
 ```
