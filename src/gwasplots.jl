@@ -33,9 +33,9 @@ end
 - `dpi::Union{Float64, Int64}`: dots per inch to save the png file. Higher DPI results in larger file with 
 higher resolution. Default dpi is 350.
 
-- `xlabel::AsbtractString`: option to replace x-label text
+- `xlabel::AbstractString`: option to replace x-label text
 
-- `ylabel::AsbtractString`: option to replace y-label text
+- `ylabel::AbstractString`: option to replace y-label text
 
 - `xmin::Union{Float64, Int64}`: Specified minimum x value to represent on the plot
 
@@ -102,9 +102,9 @@ that indicates pvalues must be named pval (df[:pval] must exist)
 - `dpi::Int64`: dots per inch to save the png file. Higher DPI results in larger file with 
 higher resolution. Default dpi is 350.
 
-- `xlabel::AsbtractString`: option to replace x-label text
+- `xlabel::AbstractString`: option to replace x-label text
 
-- `ylabel::AsbtractString`: option to replace y-label text
+- `ylabel::AbstractString`: option to replace y-label text
 
 - `xmin::Union{Float64, Int64}`: Specified minimum x value to represent on the plot
 
@@ -142,9 +142,9 @@ in order of basepairs going from first to last.
 - `dpi::Int64`: dots per inch to save the png file. Higher DPI results in larger file with 
 higher resolution. Default dpi is 350.
 
-- `xlabel::AsbtractString`: option to replace x-label text
+- `xlabel::AbstractString`: option to replace x-label text
 
-- `ylabel::AsbtractString`: option to replace y-label text
+- `ylabel::AbstractString`: option to replace y-label text
 
 - `ymax::Union{Float64, Int64}`: Specified maximum y value to represent on the plot
 
@@ -154,8 +154,8 @@ higher resolution. Default dpi is 350.
 """
 function manhattan(df::DataFrame, titles::AbstractString = "Manhattan Plot",
     outfile::AbstractString = "manhattan.png",
-    dpi::Int64 = 350, xlabel::AsbtractString = "Chromosome",
-    ylabel::AsbtractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = nothing,
+    dpi::Int64 = 350, xlabel::AbstractString = "Chromosome",
+    ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = nothing,
     signifline::Union{Float64, Int64} = nothing, linecolor = "deepskyblue1"; kwargs...)
 
     df[:SNPnumber] = collect(1:size(df)[1])
@@ -227,9 +227,9 @@ end
 - `dpi::Int64`: dots per inch to save the png file. Higher DPI results in larger file with 
 higher resolution. Default dpi is 350.
 
-- `xlabel::AsbtractString`: option to replace x-label text
+- `xlabel::AbstractString`: option to replace x-label text
 
-- `ylabel::AsbtractString`: option to replace y-label text
+- `ylabel::AbstractString`: option to replace y-label text
 
 - `ymax::Union{Float64, Int64}`: Specified maximum y value to represent on the plot
 
