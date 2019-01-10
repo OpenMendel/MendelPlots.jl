@@ -77,7 +77,7 @@ function qq(pvalues::AbstractArray;
     λ = median(quantile.(Chisq(1), 1 .- pvalues) ./ quantile(Chisq(1), 0.5))
     
     pCI = layer(x = civals[:, 2], y = civals[:, 1], Geom.polygon(fill = true,
-        preserve_order = true), Theme(default_color = Colors.RGBA(0, 0, 0, 0.3),
+        preserve_order = true), Theme(default_color = Colors.RGBA(0, 0, 0, 0.2),
         panel_fill = nothing, grid_line_width = 0mm));
 
     pmain = layer(x = expect, y = obs, Geom.point, intercept=[0], slope = [1],
