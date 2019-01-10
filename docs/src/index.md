@@ -45,7 +45,7 @@ using TextParse, DataFrames, MendelPlots
 
 `data` folder of the package in test an example data set. In this tutorial, we use relative path `../data`. In general, user can locate this folder by command
 ```julia
-import PolrGWAS
+import MendelPlots
 joinpath(dirname(pathof(MendelPlots)), "../test/data")
 ```
 
