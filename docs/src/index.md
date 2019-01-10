@@ -89,7 +89,7 @@ The following command creates a qq plot from the data
 qq(df)
 ```
 
-<img src="qqplot.png">
+<img src="../qqplot.png">
 
 For documentation of the `qq` function, type `?qq` in Julia REPL.
 ```@docs
@@ -103,7 +103,7 @@ The following command creates a manhattan plot from the data
 manhattan(df)
 ```
 
-<img src="manhattan.png">
+<img src="../manhattan.png">
 
 For documentation of the `manhattan` function, type `?manhattan` in Julia REPL.
 ```@docs
