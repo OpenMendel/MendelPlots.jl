@@ -125,10 +125,3 @@ There are several other options that the `qq` and `manhattan` functions take, re
 `qq` outputs a .png file of the QQ plot. By default, it will be named qqplot.png. Use the keyword argument 'outfile' to change the output file name.
 
 `manhattan` outputs a .png file of the Manhattan plot. By default, it will be named manhattan.png. Use the keyword argument 'outfile' to change the output file name.
-
-
-```julia
-#clean up files 
-rm("manhattan.png")
-rm("qqplot.png")
-```

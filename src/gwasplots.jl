@@ -1,9 +1,3 @@
-#Contains the plot functions for GWAS studies 
-
-#uses these libraries:
-#using Gadfly, Compose, Statistics, DataFrames, Distributions
-#import Cairo, Fontconfig
-
 #base functions for useful things 
 
 #creates evenly spaced points for qqplots
@@ -57,8 +51,19 @@ function qq(pvalues::AbstractArray;
     xmax::Union{Float64, Int64} = 0.0, ymax::Union{Float64, Int64} = 0.0,
     linecolor::AbstractString = "red", kwargs...)
 
+    N = length(pvalues)
+    up = Array{Float64}(undef, N)
+    low = Array{Float64}(undef, N)
+    for i in 1:N
+        low[i] = -log10(quantile(Beta(i, N - i + 1), 0.975))
+        up[i] = -log10(quantile(Beta(i, N - i + 1), 0.025))
+    end
+    up = sort!(up)
     obs = -log10.(sort(pvalues))
     expect = -log10.(ppoints(length(pvalues)))
+
+    civals = [low expect; up sort(expect)]
+    
     if xmax == 0.0
         xmax = ceil(maximum(expect))
     end
@@ -70,16 +75,25 @@ function qq(pvalues::AbstractArray;
     xλ = xmax - 1.0
     #calculate genomic inflation factor
     λ = median(quantile.(Chisq(1), 1 .- pvalues) ./ quantile(Chisq(1), 0.5))
-    plt1 = plot(x = expect, y = obs, Geom.point, intercept=[0], slope = [1],
-        Guide.title(titles), Geom.abline(color = linecolor, style = :dash),
-        Scale.x_continuous(minvalue = xmin, maxvalue = xmax),
-        Scale.y_continuous(minvalue = ymin, maxvalue = ymax),
-        Guide.xlabel(xlabel), Guide.ylabel(ylabel),
-        Guide.xticks(ticks = xticks), Guide.yticks(ticks = yticks),
+    
+    pCI = layer(x = civals[:, 2], y = civals[:, 1], Geom.polygon(fill = true,
+        preserve_order = true), Theme(default_color = Colors.RGBA(0, 0, 0, 0.3),
+        panel_fill = nothing, grid_line_width = 0mm));
+
+    pmain = layer(x = expect, y = obs, Geom.point, intercept=[0], slope = [1],
+        Geom.abline(color = linecolor, style = :dash),
         Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
-        key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"),
-        Guide.annotation(compose(context(), text(xλ, 0, "λ = " * string(round(λ, sigdigits = 4))))); 
-        kwargs...);
+        key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"); 
+        kwargs..., order = 1);
+
+    plt1 = plot(pCI, pmain, Scale.x_continuous(minvalue = xmin, maxvalue = xmax),
+        Scale.y_continuous(minvalue = ymin, maxvalue = ymax), Guide.title(titles), 
+        Guide.xlabel(xlabel), Guide.ylabel(ylabel), Guide.xticks(ticks = xticks), 
+        Guide.yticks(ticks = yticks), 
+        Guide.annotation(compose(context(), text(xλ, 0, "λ = " * string(round(λ, sigdigits = 4))))),
+        Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
+        key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"));
+
     draw(PNG(outfile, 5inch, 5inch, dpi = dpi), plt1);
 end
 

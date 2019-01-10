@@ -2,7 +2,7 @@ __precompile__()
 
 module MendelPlots
 
-using Compose, Statistics, DataFrames, Distributions, Reexport, DataFrames, TextParse
+using Compose, Statistics, DataFrames, Distributions, Reexport, DataFrames, TextParse, Colors
 @reexport using Gadfly
 import Cairo
 
