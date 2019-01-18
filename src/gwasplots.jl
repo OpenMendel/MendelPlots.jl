@@ -183,9 +183,9 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
 
     if typeof(df[:chr][1]) != String
         df[:chr] = string.(df[:chr])
-        xlabs = string.(parse.(Int64, unique(df[:chr]))[1:2:end])
+        xlabs = unique(df[:chr])[1:2:end]
     else
-        xlabs = parse.(Int64, unique(df[:chr]))[1:2:end]
+        xlabs = unique(df[:chr])[1:2:end]
     end
 
     if signifline == -1
