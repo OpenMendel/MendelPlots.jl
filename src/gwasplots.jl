@@ -144,7 +144,8 @@ end
 
 - `df::DataFrame`: A DataFrame containing information to be used in the Manhattan Plot. Note, DataFrame must have the
 following values saved under the corresponding names. pvalues:pval, chromosome:chr. Additionally, the DataFrame must be
-in order of basepairs going from first to last. 
+in order of basepairs going from first to last if there's no position arguement. Optionally, if there is 
+basepair information, then the position variable must be named `pos`. 
 
 # Keyword arguments
 
@@ -273,29 +274,26 @@ end
 - `pvalues::AbstractArray`: pvalues for the associated GWAS. Must be in the order of the basepairs. 
 
 - `chr::AbstractArray`: An array of chromosome identifiers for each pvalue. Must match order with pvalues. 
-
-# Keyword arguments
-
-- `titles::AbstractString`: Title for the plot. Default is "Manhattan Plot".
- To have blank enter "". 
-
-- `outfile::AbstractString`: output name to save for qqplot as a png. Default is "manhattan.png"
-
-- `dpi::Int64`: dots per inch to save the png file. Higher DPI results in larger file with 
-higher resolution. Default dpi is 350.
-
-- `xlabel::AbstractString`: option to replace x-label text
-
-- `ylabel::AbstractString`: option to replace y-label text
-
-- `ymax::Union{Float64, Int64}`: Specified maximum y value to represent on the plot
-
-- `signifline::Union{Float64, Int64}`: Line to draw significance at. Default in Bonferonni corrected p-value for α = 0.05. 
-
-- `linecolor::AbstractString`: Color for significance line. Default is 'deepskyblue1'. 
 """
 function manhattan(pvalues::AbstractArray, chr::AbstractArray; kwargs...)
     df = DataFrame(pval = pvalues, chr = chr)
+    manhattan(df; kwargs...)
+end
+
+
+"""
+    manhattan(pvalues::AbstractArray, chr::AbstractArray, pos::AbstractArray)
+
+# Position arguments
+
+- `pvalues::AbstractArray`: pvalues for the associated GWAS. Must be in the order of the basepairs. 
+
+- `chr::AbstractArray`: An array of chromosome identifiers for each pvalue. Must match order with pvalues and positions. 
+
+- `pos::AbstractArray`: An array of basepair positions for each pvalue/chromosome. Must match order with pvalues and chromosomes. 
+"""
+function manhattan(pvalues::AbstractArray, chr::AbstractArray, pos::AbstractArray; kwargs...)
+    df = DataFrame(pval = pvalues, chr = chr, pos = pos)
     manhattan(df; kwargs...)
 end
 
