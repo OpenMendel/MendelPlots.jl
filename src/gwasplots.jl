@@ -39,7 +39,9 @@ higher resolution. Default dpi is 350.
 
 - `ymax::Union{Float64, Int64}`: Specified maximum y value to represent on the plot
 
-- `linecolor::AbstractString`: Color of "normal" line. Default color is 'red'. 
+- `linecolor::AbstractString`: Color of "normal" line. Default color is "red". 
+
+- `dotcolor::AbstractString`: Color of the dots. Default color is "black". 
 
 """
 function qq(pvalues::AbstractArray; 
@@ -49,7 +51,7 @@ function qq(pvalues::AbstractArray;
     ylabel::AbstractString = "Observed -log<sub>10</sub>(p)", 
     xmin::Union{Float64, Int64} = 0.0, ymin::Union{Float64, Int64} = 0.0, 
     xmax::Union{Float64, Int64} = 0.0, ymax::Union{Float64, Int64} = 0.0,
-    linecolor::AbstractString = "red", kwargs...)
+    linecolor::AbstractString = "red", dotcolor::AbstractString = "black", kwargs...)
 
     N = length(pvalues)
     up = Array{Float64}(undef, N)
@@ -83,8 +85,8 @@ function qq(pvalues::AbstractArray;
     pmain = layer(x = expect, y = obs, Geom.point, intercept=[0], slope = [1],
         Geom.abline(color = linecolor, style = :dash),
         Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
-        key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"); 
-        kwargs..., order = 1);
+        key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black", 
+        default_color = dotcolor); kwargs..., order = 1);
 
     plt1 = plot(pCI, pmain, Scale.x_continuous(minvalue = xmin, maxvalue = xmax),
         Scale.y_continuous(minvalue = ymin, maxvalue = ymax), Guide.title(titles), 
