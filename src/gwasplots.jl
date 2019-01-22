@@ -199,7 +199,7 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
         a[:bp_add] = cumsum(a[:max_pos]) - a[:max_pos]
         df = join(df, a, on  = :chr)
         df[:adj_bp] = df[:pos] .+ df[:bp_add]
-        xticks = by(df, :chr, d -> (maximum(d.adj_bp) + minimum(d.adj_bp))/2)[2][1:2:end]
+        xticks = by(df, :chr, :adj_bp => d -> (maximum(d) + minimum(d))/2)[2][1:2:end]
 
         function convertlabsBP(i)
             return string.(xlabs)[findfirst(xticks .== i)]
