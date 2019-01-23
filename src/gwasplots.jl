@@ -43,6 +43,8 @@ higher resolution. Default dpi is 350.
 
 - `dotcolor::AbstractString`: Color of the dots. Default color is "black". 
 
+- `fontsize` size of the axis labels. Default is "20pt". 
+
 """
 function qq(pvalues::AbstractArray; 
     titles::AbstractString = "QQ Plot of GWAS p-values", 
@@ -51,7 +53,8 @@ function qq(pvalues::AbstractArray;
     ylabel::AbstractString = "Observed -log<sub>10</sub>(p)", 
     xmin::Union{Float64, Int64} = 0.0, ymin::Union{Float64, Int64} = 0.0, 
     xmax::Union{Float64, Int64} = 0.0, ymax::Union{Float64, Int64} = 0.0,
-    linecolor::AbstractString = "red", dotcolor::AbstractString = "black", kwargs...)
+    linecolor::AbstractString = "red", dotcolor::AbstractString = "black", 
+    fontsize = 20pt, kwargs...)
 
     N = length(pvalues)
     up = Array{Float64}(undef, N)
@@ -94,7 +97,8 @@ function qq(pvalues::AbstractArray;
         Guide.yticks(ticks = yticks), 
         Guide.annotation(compose(context(), text(xλ, 0, "λ = " * string(round(λ, sigdigits = 4))))),
         Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
-        key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"));
+        key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
+        major_label_font_size = fontsize));
 
     draw(PNG(outfile, 5inch, 5inch, dpi = dpi), plt1);
 end
@@ -131,6 +135,8 @@ higher resolution. Default dpi is 350.
 - `ymax::Float64`: Specified maximum y value to represent on the plot
 
 - `linecolor::AbstractString`: Color of "normal" line. Default color is 'red'. 
+
+- `fontsize` size of the axis labels. Default is "20pt". 
 """
 function qq(df::DataFrame; kwargs...)
     qq(df[:pval]; kwargs...)
@@ -144,36 +150,68 @@ end
 
 # Position arguments
 
-- `df::DataFrame`: A DataFrame containing information to be used in the Manhattan Plot. Note, DataFrame must have the
-following values saved under the corresponding names. pvalues:pval, chromosome:chr. Additionally, the DataFrame must be
-in order of basepairs going from first to last if there's no position arguement. Optionally, if there is 
+- `df::DataFrame`: A DataFrame containing information to be used in the Manhattan Plot. 
+Note, DataFrame must have the following values saved under the corresponding names. 
+pvalues:pval, chromosome:chr. Additionally, the DataFrame must be in order of basepairs 
+going from first to last if there's no position arguement. Optionally, if there is 
 basepair information, then the position variable must be named `pos`. 
+
+
+    manhattan(pvalues::AbstractArray, chr::AbstractArray)
+
+# Position arguments
+
+- `pvalues::AbstractArray`: pvalues for the associated GWAS. Must be in the 
+order of the basepairs. 
+
+- `chr::AbstractArray`: An array of chromosome identifiers for each pvalue. 
+Must match order with pvalues. 
+
+
+    manhattan(pvalues::AbstractArray, chr::AbstractArray, pos::AbstractArray)
+
+# Position arguments
+
+- `pvalues::AbstractArray`: pvalues for the associated GWAS. 
+Must be in the same order of the basepairs and chromosomes. 
+
+- `chr::AbstractArray`: An array of chromosome identifiers for each pvalue. 
+Must match order with pvalues and positions. 
+
+- `pos::AbstractArray`: An array of basepair positions for each pvalue/chromosome. 
+Must match order with pvalues and chromosomes. 
 
 # Keyword arguments
 
 - `titles::AbstractString`: Title for the plot. Default is "Manhattan Plot".
  To have blank enter "". 
 
-- `outfile::AbstractString`: output name to save for qqplot as a png. Default is "manhattan.png"
+- `outfile::AbstractString`: output name to save for qqplot as a png.
+Default is "manhattan.png"
 
-- `dpi::Int64`: dots per inch to save the png file. Higher DPI results in larger file with 
-higher resolution. Default dpi is 350.
+- `dpi::Int64`: dots per inch to save the png file. Higher DPI results in 
+larger file with higher resolution. Default dpi is 350.
 
 - `xlabel::AbstractString`: option to replace x-label text
 
 - `ylabel::AbstractString`: option to replace y-label text
 
-- `ymax::Union{Float64, Int64}`: Specified maximum y value to represent on the plot
+- `ymax::Union{Float64, Int64}`: Specified maximum y value to represent 
+on the plot
 
-- `signifline::Union{Float64, Int64}`: Line to draw significance at. Default in Bonferonni corrected p-value for α = 0.05. 
+- `signifline::Union{Float64, Int64}`: Line to draw significance at. 
+Default in Bonferonni corrected p-value for α = 0.05. 
 
-- `linecolor::AbstractString`: Color for significance line. Default is 'deepskyblue1'. 
+- `linecolor::AbstractString`: Color for significance line. Default 
+is 'deepskyblue1'. 
+
+- `fontsize` size of the axis labels. Default is "20pt". 
 """
 function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
     outfile::AbstractString = "manhattan.png",
     dpi::Int64 = 350, xlabel::AbstractString = "Chromosome",
     ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = 0,
-    signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", kwargs...)
+    signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", fontsize = 20pt, kwargs...)
 
     using_basepairs = :pos in names(df)
 
@@ -227,7 +265,8 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
                 Geom.abline(), intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
                 Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
-                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"),
+                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
+                major_label_font_size = fontsize),
                 Guide.yticks(ticks = yticks), Scale.color_discrete_manual("#d54359", "#5ab543", 
                 "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
                 "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
@@ -239,8 +278,9 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
                 Geom.abline(), intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
                 Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm, 
-                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"),
-                Guide.yticks(ticks = yticks), Scale.color_discrete; kwargs...);
+                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
+                major_label_font_size = fontsize), Guide.yticks(ticks = yticks), 
+                Scale.color_discrete; kwargs...);
         end
     else
         if length(unique(df[:chr])) == 22
@@ -249,7 +289,8 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
                 Geom.abline(), intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
                 Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
-                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"),
+                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
+                major_label_font_size = fontsize),
                 Guide.yticks(ticks = yticks), Scale.color_discrete_manual("#d54359", "#5ab543", 
                 "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
                 "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
@@ -261,39 +302,20 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
                 Geom.abline(), intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
                 Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm, 
-                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black"),
+                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
+                major_label_font_size = fontsize),
                 Guide.yticks(ticks = yticks), Scale.color_discrete; kwargs...);
         end
     end
     draw(PNG(outfile, 6inch, 4inch, dpi = dpi), plt1);
 end
 
-"""
-    manhattan(pvalues::AbstractArray, chr::AbstractArray)
 
-# Position arguments
-
-- `pvalues::AbstractArray`: pvalues for the associated GWAS. Must be in the order of the basepairs. 
-
-- `chr::AbstractArray`: An array of chromosome identifiers for each pvalue. Must match order with pvalues. 
-"""
 function manhattan(pvalues::AbstractArray, chr::AbstractArray; kwargs...)
     df = DataFrame(pval = pvalues, chr = chr)
     manhattan(df; kwargs...)
 end
 
-
-"""
-    manhattan(pvalues::AbstractArray, chr::AbstractArray, pos::AbstractArray)
-
-# Position arguments
-
-- `pvalues::AbstractArray`: pvalues for the associated GWAS. Must be in the order of the basepairs. 
-
-- `chr::AbstractArray`: An array of chromosome identifiers for each pvalue. Must match order with pvalues and positions. 
-
-- `pos::AbstractArray`: An array of basepair positions for each pvalue/chromosome. Must match order with pvalues and chromosomes. 
-"""
 function manhattan(pvalues::AbstractArray, chr::AbstractArray, pos::AbstractArray; kwargs...)
     df = DataFrame(pval = pvalues, chr = chr, pos = pos)
     manhattan(df; kwargs...)
