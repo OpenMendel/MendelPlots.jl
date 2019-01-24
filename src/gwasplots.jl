@@ -54,7 +54,7 @@ function qq(pvalues::AbstractArray;
     xmin::Union{Float64, Int64} = 0.0, ymin::Union{Float64, Int64} = 0.0, 
     xmax::Union{Float64, Int64} = 0.0, ymax::Union{Float64, Int64} = 0.0,
     linecolor::AbstractString = "red", dotcolor::AbstractString = "black", 
-    fontsize = 20pt, kwargs...)
+    fontsize = 17pt, kwargs...)
 
     N = length(pvalues)
     up = Array{Float64}(undef, N)
@@ -211,7 +211,8 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
     outfile::AbstractString = "manhattan.png",
     dpi::Int64 = 350, xlabel::AbstractString = "Chromosome",
     ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = 0,
-    signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", fontsize = 20pt, kwargs...)
+    signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", fontsize = 17pt,
+    kwargs...)
 
     using_basepairs = :pos in names(df)
 
