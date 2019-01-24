@@ -32,3 +32,7 @@ The software is relatively new. [File an
 issue](https://github.com/OpenMendel/MendelPlots.jl/issues/new) to report a
 bug or request a feature.
 
+
+
+<img src="docs/qqplot.png">
+<img src="docs/manhattan.png">
