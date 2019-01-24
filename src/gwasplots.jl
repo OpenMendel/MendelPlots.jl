@@ -17,6 +17,13 @@ end
 
 - `pvalues::AbstractArray`: pvalues. A one dimensional array containing pvalues to be used in the qqplot.
 
+qq(df::DataFrame)
+
+# Position arguments
+
+- `df::DataFrame`: DataFrame containing pvalues to be used in the qqplot. Note: The column of the dataframe
+that indicates pvalues must be named pval (df[:pval] must exist)
+
 # Keyword arguments
 
 - `titles::AbstractString`: Title for the plot. Default is "QQ Plot of GWAS p-values".
@@ -43,7 +50,7 @@ higher resolution. Default dpi is 350.
 
 - `dotcolor::AbstractString`: Color of the dots. Default color is "black". 
 
-- `fontsize` size of the axis labels. Default is "20pt". 
+- `fontsize` size of the axis labels. Default is "17pt". 
 
 """
 function qq(pvalues::AbstractArray; 
@@ -104,40 +111,6 @@ function qq(pvalues::AbstractArray;
 end
 
 
-"""
-    qq(df::DataFrame)
-
-# Position arguments
-
-- `df::DataFrame`: DataFrame containing pvalues to be used in the qqplot. Note: The column of the dataframe
-that indicates pvalues must be named pval (df[:pval] must exist)
-
-# Keyword arguments
-
-- `titles::AbstractString`: Title for the plot. Default is "QQ Plot of GWAS p-values".
- To have blank enter "". 
-
-- `outfile::AbstractString`: output name to save for qqplot as a png. Default is "qqplot.png"
-
-- `dpi::Int64`: dots per inch to save the png file. Higher DPI results in larger file with 
-higher resolution. Default dpi is 350.
-
-- `xlabel::AbstractString`: option to replace x-label text
-
-- `ylabel::AbstractString`: option to replace y-label text
-
-- `xmin::Union{Float64, Int64}`: Specified minimum x value to represent on the plot
-
-- `xmax::Union{Float64, Int64}`: Specified maximum x value to represent on the plot
-
-- `ymin::Float64`: Specified minimum y value to represent on the plot
-
-- `ymax::Float64`: Specified maximum y value to represent on the plot
-
-- `linecolor::AbstractString`: Color of "normal" line. Default color is 'red'. 
-
-- `fontsize` size of the axis labels. Default is "20pt". 
-"""
 function qq(df::DataFrame; kwargs...)
     qq(df[:pval]; kwargs...)
 end
@@ -205,7 +178,7 @@ Default in Bonferonni corrected p-value for α = 0.05.
 - `linecolor::AbstractString`: Color for significance line. Default 
 is 'deepskyblue1'. 
 
-- `fontsize` size of the axis labels. Default is "20pt". 
+- `fontsize` size of the axis labels. Default is "17pt". 
 """
 function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
     outfile::AbstractString = "manhattan.png",

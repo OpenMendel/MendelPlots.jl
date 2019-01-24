@@ -2,7 +2,7 @@ using Test, MendelPlots, TextParse, DataFrames, Compose, Cairo
 
 
 const datadir = joinpath(dirname(@__FILE__), "data")
-const datafile = datadir * "/polrgwas.scoretest.txt"
+const datafile = datadir * "/gwasresults.txt"
 data, colnames = csvread(datafile, ',', header_exists = true)
 df = DataFrame([i for i in data], Symbol.(colnames))
 
@@ -21,13 +21,13 @@ end
 end
 
 @testset "Basic QQ Plot" begin
-    @time qq(df; titles = "Manhattan Plot")
+    @time qq(df; titles = "QQ Plot")
     @test isfile("qqplot.png")
     rm("qqplot.png")
 end
 
 @testset "Advanced QQ Plot" begin
-    @time qq(df; titles = "Manhattan Plot", dpi = 300, outfile = "testqq.png", 
+    @time qq(df; titles = "QQ Plot", dpi = 300, outfile = "testqq.png", 
     xmax = 10, xmin = 0, ymin = 1, ymax = 20)
     @test isfile("testqq.png")
     rm("testqq.png")
