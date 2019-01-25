@@ -7,12 +7,7 @@
 
 MendelPlots.jl is a Julia package for generating common plots from results of genome-wide association studies (GWAS). It can currently create Manhattan Plots and QQ Plots. 
 
-| **Documentation** | **Build Status** | **Help** |
-|:---:|:---:|:---:|
-| [![][docs-dev-img]][docs-dev-url] [![][docs-stable-img]][docs-stable-url] | [![][travis-img]][travis-url] [![][codecov-img]][codecov-url] | [![][slack-img]][slack-url] [![][gitter-img]][gitter-url] |
-
-**MendelPlots** is a plotting and data visualization system written in
-[Julia](http://julialang.org/). It uses [Gadfly](https://github.com/GiovineItalia/Gadfly.jl) as the backend, which is influenced by Grammar of Graphics Style programming and Hadley Wickham's [ggplot2](http://ggplot2.org/)
+**MendelPlots** is a plotting and data visualization system written in [Julia](http://julialang.org/). It uses [Gadfly](https://github.com/GiovineItalia/Gadfly.jl) as the backend, which is influenced by Grammar of Graphics Style programming and Hadley Wickham's [ggplot2](http://ggplot2.org/)
 
 ## Citation
 
