@@ -8,31 +8,29 @@ julia:
   - 1.0
   - nightly
 matrix:
-  fast_finish: true
   allow_failures:
     - julia: nightly
+addons:
+    apt_packages:
+        - gfortran
 notifications:
   email: false
+git:
+  depth: 99999999
+  
 before_script:
   - julia -e 'using Pkg; Pkg.add(PackageSpec(name="Compose", rev="master"))'
   - julia -e 'using Pkg; Pkg.add(PackageSpec(name="Gadfly", rev="master"))'
 after_success:
-  - julia -e 'using Pkg; Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder())'
+  - julia -e 'using Pkg, MendelPlots; cd(joinpath(dirname(pathof(MendelPlots)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
+
 
 jobs:
   include:
     - stage: "Documentation"
       julia: 1.0
-      os: linux
-      # disable global before_script in order not to install Compose twice
-      before_script:
+      os: osx
       script:
-        - |
-          julia --color=yes --project=docs/ -e'
-            using Pkg
-            Pkg.add(PackageSpec(name="Compose", rev="master"))
-            Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()
-            include("docs/make.jl")
-          '
-      after_success: skip
+        - julia -e 'using Pkg; Pkg.add("Documenter")'
+        - julia -e 'using MendelPlots; include(joinpath(dirname(pathof(MendelPlots)), "..", "docs", "make.jl"))'
+      after_script: skip
