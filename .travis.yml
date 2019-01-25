@@ -17,10 +17,10 @@ notifications:
   email: false
 git:
   depth: 99999999
-  
-before_script:
-  - julia -e 'using Pkg; Pkg.add(PackageSpec(name="Compose", rev="master"))'
-  - julia -e 'using Pkg; Pkg.add(PackageSpec(name="Gadfly", rev="master"))'
+
+#before_script:
+#  - julia -e 'using Pkg; Pkg.add(PackageSpec(name="Compose", rev="master"))'
+#  - julia -e 'using Pkg; Pkg.add(PackageSpec(name="Gadfly", rev="master"))'
 after_success:
   - julia -e 'using Pkg, MendelPlots; cd(joinpath(dirname(pathof(MendelPlots)), "..")); Pkg.add("Coverage"); using Coverage; Codecov.submit(process_folder()); Coveralls.submit(process_folder())'
 
