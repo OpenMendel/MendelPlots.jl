@@ -50,7 +50,7 @@ higher resolution. Default dpi is 350.
 
 - `dotcolor::AbstractString`: Color of the dots. Default color is "black". 
 
-- `fontsize` size of the axis labels. Default is "17pt". 
+- `fontsize` size of the axis labels. Default is "15pt". 
 
 """
 function qq(pvalues::AbstractArray; 
@@ -61,7 +61,7 @@ function qq(pvalues::AbstractArray;
     xmin::Union{Float64, Int64} = 0.0, ymin::Union{Float64, Int64} = 0.0, 
     xmax::Union{Float64, Int64} = 0.0, ymax::Union{Float64, Int64} = 0.0,
     linecolor::AbstractString = "red", dotcolor::AbstractString = "black", 
-    fontsize = 17pt, kwargs...)
+    fontsize = 15pt, kwargs...)
 
     N = length(pvalues)
     up = Array{Float64}(undef, N)
@@ -178,13 +178,13 @@ Default in Bonferonni corrected p-value for α = 0.05.
 - `linecolor::AbstractString`: Color for significance line. Default 
 is 'deepskyblue1'. 
 
-- `fontsize` size of the axis labels. Default is "17pt". 
+- `fontsize` size of the axis labels. Default is "15pt". 
 """
 function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
     outfile::AbstractString = "manhattan.png",
     dpi::Int64 = 350, xlabel::AbstractString = "Chromosome",
     ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = 0,
-    signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", fontsize = 17pt,
+    signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", fontsize = 15pt,
     kwargs...)
 
     using_basepairs = :pos in names(df)
