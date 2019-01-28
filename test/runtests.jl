@@ -20,6 +20,14 @@ end
     rm("testmanhat.png")
 end
 
+@testset "Advanced Manhattan Plot 2" begin
+    @time manhattan(df[:pval], df[:chr], df[:pos]; titles = "Manhattan Plot", dpi = 300, 
+    ylabel = "expected", xlabel = "observed", outfile = "testmanhat2.png",
+    ymax = 20, linecolor = "green", signifline = 1e-7, fontsize = 5pt)
+    @test isfile("testmanhat2.png")
+    rm("testmanhat2.png")
+end
+
 @testset "Basic QQ Plot" begin
     @time qq(df; titles = "QQ Plot")
     @test isfile("qqplot.png")

@@ -112,6 +112,9 @@ end
 
 
 function qq(df::DataFrame; kwargs...)
+    if !(:pval in names(df))
+        throw(ArgumentError("pval not in dataframe. Please rename column of pvalues to `pval`"))
+    end
     qq(df[:pval]; kwargs...)
 end
 
@@ -186,6 +189,11 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
     ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = 0,
     signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", fontsize = 15pt,
     kwargs...)
+
+    if !((:pval in names(df)) & (:chr in names(df)))
+        throw(ArgumentError("pval and/or chr not in dataframe. 
+        Please rename column of pvalues to `pval` and column of chromosomes to `chr`"))
+    end
 
     using_basepairs = :pos in names(df)
 
