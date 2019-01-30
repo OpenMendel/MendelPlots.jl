@@ -17,7 +17,7 @@ end
 
 - `pvalues::AbstractArray`: pvalues. A one dimensional array containing pvalues to be used in the qqplot.
 
-qq(df::DataFrame)
+    qq(df::DataFrame)
 
 # Position arguments
 
@@ -29,7 +29,8 @@ that indicates pvalues must be named pval (df[:pval] must exist)
 - `titles::AbstractString`: Title for the plot. Default is "QQ Plot of GWAS p-values".
  To have blank enter "". 
 
-- `outfile::AbstractString`: output name to save for qqplot as a png. Default is "qqplot.png"
+- `outfile::AbstractString`: output name to save the QQplot. Name should end in format.
+Default is "qqplot.png". Supports .png, .pdf, and .svg files. 
 
 - `dpi::Union{Float64, Int64}`: dots per inch to save the png file. Higher DPI results in larger file with 
 higher resolution. Default dpi is 350.
@@ -52,6 +53,8 @@ higher resolution. Default dpi is 350.
 
 - `fontsize` size of the axis labels. Default is "15pt". 
 
+- `pvalvar` variable indicating pvalue column name (for dataframes only). Default is "pval". 
+
 """
 function qq(pvalues::AbstractArray; 
     titles::AbstractString = "QQ Plot of GWAS p-values", 
@@ -62,6 +65,13 @@ function qq(pvalues::AbstractArray;
     xmax::Union{Float64, Int64} = 0.0, ymax::Union{Float64, Int64} = 0.0,
     linecolor::AbstractString = "red", dotcolor::AbstractString = "black", 
     fontsize = 15pt, kwargs...)
+
+    format = lowercase(split(outfile, ".")[end])
+    if !(format in ["png", "pdf", "svg"])
+        throw(ArgumentError("Incorrect file format specified in outfile option.
+         outfile should end in .png, .pdf, or .svg (very slow)."))
+    end
+
 
     N = length(pvalues)
     up = Array{Float64}(undef, N)
@@ -107,26 +117,36 @@ function qq(pvalues::AbstractArray;
         key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
         major_label_font_size = fontsize));
 
-    draw(PNG(outfile, 5inch, 5inch, dpi = dpi), plt1);
+    if format == "png"
+        draw(PNG(outfile, 5inch, 5inch, dpi = dpi), plt1);
+    elseif format == "pdf"
+        draw(PDF(outfile, 5inch, 5inch, dpi = dpi), plt1);
+    elseif format == "svg"
+        draw(SVG(outfile, 5inch, 5inch), plt1);
+    else
+        throw(ArgumentError("This should not display. Please report format issue."))
+    end
 end
 
 
-function qq(df::DataFrame; kwargs...)
-    if !(:pval in names(df))
-        throw(ArgumentError("pval not in dataframe. Please rename column of pvalues to `pval`"))
+function qq(df::DataFrame; pvalvar::AbstractString = "pval", kwargs...)
+    pvalsym = Meta.parse(pvalvar)
+    if !(pvalsym in names(df))
+        throw(ArgumentError(pvalvar * " is not in the dataframe. Please rename 
+        the column of pvalues to `pval` or specify the correct name using the `pvalvar` argument"))
     end
-    qq(df[:pval]; kwargs...)
+    qq(df[pvalsym]; kwargs...)
 end
 
 
 
 
 """
-    manhattan(df::DataFrame)
+    manhattan(data::DataFrame)
 
 # Position arguments
 
-- `df::DataFrame`: A DataFrame containing information to be used in the Manhattan Plot. 
+- `data::DataFrame`: A DataFrame containing information to be used in the Manhattan Plot. 
 Note, DataFrame must have the following values saved under the corresponding names. 
 pvalues:pval, chromosome:chr. Additionally, the DataFrame must be in order of basepairs 
 going from first to last if there's no position arguement. Optionally, if there is 
@@ -162,8 +182,8 @@ Must match order with pvalues and chromosomes.
 - `titles::AbstractString`: Title for the plot. Default is "Manhattan Plot".
  To have blank enter "". 
 
-- `outfile::AbstractString`: output name to save for qqplot as a png.
-Default is "manhattan.png"
+- `outfile::AbstractString`: output name to save the manhattan plot. Name should end in format.
+Default is "manhattan.png". Supports .png, .pdf, and .svg files. 
 
 - `dpi::Int64`: dots per inch to save the png file. Higher DPI results in 
 larger file with higher resolution. Default dpi is 350.
@@ -182,44 +202,73 @@ Default in Bonferonni corrected p-value for α = 0.05.
 is 'deepskyblue1'. 
 
 - `fontsize` size of the axis labels. Default is "15pt". 
+
+- `pvalvar` variable indicating pvalue column name (for dataframes only). Default is "pval". 
+
+- `chrvar` variable indicating chromosome column name (for dataframes only). Default is "chr". 
+
+- `posvar` variable indicating BP position column name (for dataframes only). Default is "pos". 
 """
-function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
+function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
     outfile::AbstractString = "manhattan.png",
     dpi::Int64 = 350, xlabel::AbstractString = "Chromosome",
     ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = 0,
     signifline::Union{Float64, Int64} = -1, linecolor = "deepskyblue1", fontsize = 15pt,
-    kwargs...)
+    pvalvar::AbstractString = "pval", chrvar::AbstractString = "chr", 
+    posvar::AbstractString = "pos", kwargs...)
 
-    if !((:pval in names(df)) & (:chr in names(df)))
-        throw(ArgumentError("pval and/or chr not in dataframe. 
-        Please rename column of pvalues to `pval` and column of chromosomes to `chr`"))
+    format = lowercase(split(outfile, ".")[end])
+    if !(format in ["png", "pdf", "svg"])
+        throw(ArgumentError("Incorrect file format specified in outfile option.
+         outfile should end in .png, .pdf, or .svg (very slow)."))
     end
 
-    using_basepairs = :pos in names(df)
+    df = deepcopy(data) #so that the original dataframe isn't modified. 
 
-    df[:log10pval] = -log10.(df[:pval])
+    pvalsym = Meta.parse(pvalvar)
+    chrsym = Meta.parse(chrvar)
+    possym = Meta.parse(posvar)
+
+    if !(pvalsym in names(df))
+        throw(ArgumentError(pvalvar * " is not in the dataframe. Please rename 
+        the column of pvalues to `pval` or specify the correct name using the `pvalvar` argument"))
+    end
+
+    if !(chrsym in names(df))
+        throw(ArgumentError(chrvar * " is not in the dataframe. Please rename 
+        the column of chromsomes to `chr` or specify the correct name using the `chrvar` argument"))
+    end
+
+    using_basepairs = possym in names(df)
+    if !using_basepairs
+        println("No basepair information will be used as the basepair position variable
+         was not specified properly. To use BP position info, use the `posvar` argument
+         to specify the variable in the dataframe that uses basepairs.")
+    end
+
+    df[:log10pval] = -log10.(df[pvalsym])
     if ymax == 0
         ymax = ceil(maximum(df[:log10pval])) + 2.5
     end
     yticks = collect(0:2.5:ymax)
 
-    if typeof(df[:chr][1]) != String
-        df[:chr] = string.(df[:chr])
-        xlabs = unique(df[:chr])[1:2:end]
+    if typeof(df[chrsym][1]) != String
+        df[chrsym] = string.(df[chrsym])
+        xlabs = unique(df[chrsym])[1:2:end]
     else
-        xlabs = unique(df[:chr])[1:2:end]
+        xlabs = unique(df[chrsym])[1:2:end]
     end
 
     if signifline == -1
-        signifline = -log10(0.05 / length(df[:chr]))
+        signifline = -log10(0.05 / length(df[chrsym]))
     end
 
     if using_basepairs
-        a = by(df, :chr, max_pos = :pos => maximum)
+        a = by(df, chrsym, max_pos = possym => maximum)
         a[:bp_add] = cumsum(a[:max_pos]) - a[:max_pos]
-        df = join(df, a, on  = :chr)
-        df[:adj_bp] = df[:pos] .+ df[:bp_add]
-        xticks = by(df, :chr, :adj_bp => d -> (maximum(d) + minimum(d))/2)[2][1:2:end]
+        df = join(df, a, on  = chrsym)
+        df[:adj_bp] = df[possym] .+ df[:bp_add]
+        xticks = by(df, chrsym, :adj_bp => d -> (maximum(d) + minimum(d))/2)[2][1:2:end]
 
         function convertlabsBP(i)
             return string.(xlabs)[findfirst(xticks .== i)]
@@ -228,12 +277,12 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
         xticks = Vector{Float64}(undef, length(xlabs))
         df[:SNPnumber] = collect(1:size(df)[1])
         global counter = 1
-        for i in parse.(Int64, unique(df[:chr]))[1:2:end]
-            xticks[counter] = mean(df[:SNPnumber][df[:chr] .== string.(i)])
+        for i in parse.(Int64, unique(df[chrsym]))[1:2:end]
+            xticks[counter] = mean(df[:SNPnumber][df[chrsym] .== string.(i)])
             global counter = counter + 1
         end
         function convertlabs(i)
-            return df[:chr][findfirst(df[:SNPnumber] .== round(i))]
+            return df[chrsym][findfirst(df[:SNPnumber] .== round(i))]
         end
     end
 
@@ -241,8 +290,8 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
     
     #make the manhattan plot
     if using_basepairs
-        if length(unique(df[:chr])) == 22
-            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = :chr, Geom.point,
+        if length(unique(df[chrsym])) == 22
+            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrsym, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
                 Geom.abline(), intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
@@ -255,7 +304,7 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
                 "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
                 "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"); kwargs...);
         else
-            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = :chr, Geom.point,
+            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrsym, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
                 Geom.abline(), intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
@@ -265,8 +314,8 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
                 Scale.color_discrete; kwargs...);
         end
     else
-        if length(unique(df[:chr])) == 22
-            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = :chr, Geom.point,
+        if length(unique(df[chrsym])) == 22
+            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrsym, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabs),
                 Geom.abline(), intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
@@ -279,7 +328,7 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
                 "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
                 "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"); kwargs...);
         else
-            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = :chr, Geom.point,
+            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrsym, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabs),
                 Geom.abline(), intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
@@ -289,7 +338,15 @@ function manhattan(df::DataFrame; titles::AbstractString = "Manhattan Plot",
                 Guide.yticks(ticks = yticks), Scale.color_discrete; kwargs...);
         end
     end
-    draw(PNG(outfile, 6inch, 4inch, dpi = dpi), plt1);
+    if format == "png"
+        draw(PNG(outfile, 6inch, 4inch, dpi = dpi), plt1);
+    elseif format == "pdf"
+        draw(PDF(outfile, 6inch, 4inch, dpi = dpi), plt1);
+    elseif format == "svg"
+        draw(SVG(outfile, 6inch, 4inch), plt1);
+    else
+        throw(ArgumentError("This should not display. Please report format issue."))
+    end
 end
 
 

@@ -6,10 +6,13 @@ const datafile = datadir * "/gwasresults.txt"
 data, colnames = csvread(datafile, ',', header_exists = true)
 df = DataFrame([i for i in data], Symbol.(colnames))
 
-@testset "Basic Manhattan Plot" begin
+@testset "Basic Manhattan Plots (pdf and png)" begin
     @time manhattan(df)
+    @time manhattan(df, outfile = "manhattan.pdf")
+    @test isfile("manhattan.pdf")
     @test isfile("manhattan.png")
     rm("manhattan.png")
+    rm("manhattan.pdf")
 end
 
 @testset "Advanced Manhattan Plot" begin
@@ -28,10 +31,10 @@ end
     rm("testmanhat2.png")
 end
 
-@testset "Basic QQ Plot" begin
-    @time qq(df; titles = "QQ Plot")
-    @test isfile("qqplot.png")
-    rm("qqplot.png")
+@testset "Basic QQ SVG Plot" begin
+    @time qq(df; titles = "QQ Plot", outfile = "qqplot.svg")
+    @test isfile("qqplot.svg")
+    rm("qqplot.svg")
 end
 
 @testset "Advanced QQ Plot" begin
@@ -41,8 +44,5 @@ end
     rm("testqq.png")
 end
 
-
-#fieldnames(typeof(x.data))
-#fieldnames(typeof(x.theme))
 
 
