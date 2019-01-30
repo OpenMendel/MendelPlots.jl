@@ -9,9 +9,12 @@ df = DataFrame([i for i in data], Symbol.(colnames))
 @testset "Basic Manhattan Plots (pdf and png)" begin
     @time manhattan(df)
     @time manhattan(df, outfile = "manhattan.pdf")
+    @time manhattan(df, outfile = "manhattan.svg")
+    @test isfile("manhattan.svg")
     @test isfile("manhattan.pdf")
     @test isfile("manhattan.png")
     rm("manhattan.png")
+    rm("manhattan.svg")
     rm("manhattan.pdf")
 end
 
@@ -31,9 +34,12 @@ end
     rm("testmanhat2.png")
 end
 
-@testset "Basic QQ SVG Plot" begin
+@testset "Basic QQ Plots" begin
     @time qq(df; titles = "QQ Plot", outfile = "qqplot.svg")
+    @time qq(df; titles = "QQ Plot", outfile = "qqplot.pdf")
     @test isfile("qqplot.svg")
+    @test isfile("qqplot.pdf")
+    rm("qqplot.pdf")
     rm("qqplot.svg")
 end
 
@@ -42,6 +48,15 @@ end
     xmax = 10, xmin = 0, ymin = 1, ymax = 20)
     @test isfile("testqq.png")
     rm("testqq.png")
+end
+
+@testset "ArgumentErrors" begin
+    @test_throws ArgumentError manhattan(df, pvalvar = "bad")
+    @test_throws ArgumentError manhattan(df, chrvar = "chrs")
+    @test_throws ArgumentError manhattan(df, outfile = "bad.jpeg")
+    @test_throws ArgumentError qq(df, outfile = "bad.jpeg")
+    @test_throws ArgumentError qq(df, pvalvar = "pvals", outfile = "bad.png")
+
 end
 
 
