@@ -1,13 +1,13 @@
 
 # MendelPlots.jl
 
-MendelPlots.jl is a Julia package for creating plots for genome-wide association studies (GWAS) results. The package can currently create Manhattan Plots and QQ Plots for GWAS data, specifically catered to the data files created from [*OpenMendel*](https://github.com/OpenMendel) software packages [MendelGWAS](https://github.com/OpenMendel/MendelGWAS.jl) and [PolrGWAS](https://github.com/OpenMendel/PolrGWAS.jl). The input needed is a dataframe (see [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl) or individual features as arrays.
+MendelPlots.jl is a Julia package for creating plots for genome-wide association studies (GWAS) results. The package can currently create Manhattan Plots and QQ Plots for GWAS data, specifically catered to the data files created from [*OpenMendel*](https://github.com/OpenMendel) software packages [MendelGWAS](https://github.com/OpenMendel/MendelGWAS.jl) and [PolrGWAS](https://github.com/OpenMendel/PolrGWAS.jl). The input needed is a dataframe (see [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl)) or individual features as arrays.
 
 MendelPlots.jl uses [Gadfly](https://github.com/GiovineItalia/Gadfly.jl) as the backend for plotting and saves the plots as .png files. 
 
 
 # Installation
-This package requires Julia v0.7.0 or later. The package has not yet been registered and must be installed using the repository location. Start julia and use the ] key to switch to the package manager REPL and proceed as follows:
+This package requires Julia v0.7.0 or later. The package has not yet been registered and must be installed using the repository location. Start julia and use the `]` key to switch to the package manager REPL and proceed as follows:
 ```julia
 (v1.0) pkg> add https://github.com/OpenMendel/MendelPlots.jl.git
 ```
@@ -43,7 +43,7 @@ using TextParse, DataFrames, MendelPlots
 
 ## Example dataset
 
-Thee `data` folder of the package in test contains an example simulated data set. In this tutorial, we use relative path `../data`. In general, the user can locate this folder by the following command:
+The `data` folder of the package in test contains an example simulated data set. In this tutorial, we use relative path `../data`. In general, the user can locate this folder by the following command:
 ```julia
 import MendelPlots
 joinpath(dirname(pathof(MendelPlots)), "../test/data")
@@ -82,6 +82,8 @@ qq()
 manhattan()
 ``` 
 
+## QQ Plots
+
 The following command creates a qq plot from the data
 
 
@@ -89,12 +91,21 @@ The following command creates a qq plot from the data
 qq(df)
 ```
 
-<img src="../qqplot.png">
+
+```julia
+display("image/png", read("qqplot.png"))
+```
+
+
+![png](output_13_0.png)
+
 
 For documentation of the `qq` function, type `?qq` in Julia REPL.
 ```@docs
 qq
 ```
+
+## Manhattan Plots
 
 The following command creates a manhattan plot from the data
 
@@ -103,7 +114,14 @@ The following command creates a manhattan plot from the data
 manhattan(df)
 ```
 
-<img src="../manhattan.png">
+
+```julia
+display("image/png", read("manhattan.png"))
+```
+
+
+![png](output_18_0.png)
+
 
 For documentation of the `manhattan` function, type `?manhattan` in Julia REPL.
 ```@docs
@@ -112,19 +130,13 @@ manhattan
 
 ### Necessary Inputs
 
-`qq` expects either an DataFrame object input or an array of pvalues as an input. If a DataFrame is the input, the pvalues must be stored under the name pval.  
+`qq` expects either an DataFrame object input or an array of pvalues as an input. If a DataFrame is the input, the pvalues either must be stored under the name pval or you must use the `pvalvar` argument to the specify the variable name in the dataframe that corresponds to pvalue. 
 
-`manhattan` expects either an DataFrame object input or an array of pvalues and an array of chromosome IDs as an input. If a DataFrame is the input, the pvalues must be stored under the name `pval`.  The chromosomes and pvalues must correspond in order to each other, and must be ordered in according to ascending basepairs. The chromosome variable must be named `chr`. Optionally, if you have basepair location information in your DataFrame, the position variable must be named `pos`, but the basepair position isn't required to create a plot. 
+`manhattan` expects either an DataFrame object input or an array of pvalues and an array of chromosome IDs as an input. If a DataFrame is the input, the pvalues either must be stored under the name pval or you must use the `pvalvar` argument to the specify the variable name in the dataframe that corresponds to pvalue. The chromosomes and pvalues must correspond in order to each other, and must be ordered in according to ascending basepairs. The chromosome variable must either be named `chr` or the chromosome variable name must be specified using the `chrvar` argument. Optionally, if you have basepair location information in your DataFrame, the position variable must either be named `pos` or the BP position variable name must be specified using the `posvar` argument, but the basepair position isn't required to create a create a Manhattan plot. 
 
 ### Additional Options
 
-There are several other options that the `qq` and `manhattan` functions take, refer to the specific documentation for each function via the `?` command to see the option names. Current options include arguments for qq line color, qq dot color, maximum x and y values, dpi, significance line y-value, significance line color, and title. 
-
-### Output files
-
-`qq` outputs a .png file of the QQ plot. By default, it will be named qqplot.png. Use the keyword argument 'outfile' to change the output file name.
-
-`manhattan` outputs a .png file of the Manhattan plot. By default, it will be named manhattan.png. Use the keyword argument 'outfile' to change the output file name.
+There are several other options that the `qq` and `manhattan` functions take, refer to the specific documentation for each function via the `?` command to see the option names. Current options include arguments for qq line color, qq dot color, maximum x and y values, dpi, significance line y-value, significance line color, title, fontsize, and dataframe names of pvalues, chromosomes, and BP positions in your input dataframe. 
 
 You can utilize more options to create a more customized plot. 
 
@@ -132,7 +144,26 @@ You can utilize more options to create a more customized plot.
 ```julia
 qq(df[:pval]; xlabel = "Expected", ylabel = "Observed", 
     titles = "", outfile = "testqq.png", dotcolor = "gray", 
-    fontsize = 20pt, linecolor = "blue")
+    fontsize = 18pt, linecolor = "blue")
 ```
 
-<img src="../testqq.png">
+
+```julia
+display("image/png", read("testqq.png"))
+```
+
+
+![png](output_24_0.png)
+
+
+
+```julia
+manhattan(df; pvalvar = "pval", chrvar = "chr", 
+    posvar = "pos", outfile = "manhattan2.pdf", fontsize = 18pt, linecolor = "red")
+```
+
+## Saving Files
+
+`qq`, by default, outputs a .png named qqplot.png. Use the keyword argument 'outfile' to change the output file name. It will parse the output file name to ensure that the extension is compatible. Currently, we support .png, .pdf, and .svg files. 
+
+`manhattan` by default, outputs a .png named manhattan.png. Use the keyword argument 'outfile' to change the output file name. It will parse the output file name to ensure that the extension is compatible. Currently, we support .png, .pdf, and .svg files. 
