@@ -152,6 +152,8 @@ manhattan
 
 There are several other options that the `qq` and `manhattan` functions take, refer to the specific documentation for each function via the `?` command to see the option names. Current options include arguments for qq line color, qq dot color, maximum x and y values, dpi, significance line y-value, significance line color, title, fontsize, and dataframe names of pvalues, chromosomes, and BP positions in your input dataframe. 
 
+Colors available to be specified can be found in the [R colors](http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf) link.
+
 You can utilize more options to create a more customized plot. 
 
 
