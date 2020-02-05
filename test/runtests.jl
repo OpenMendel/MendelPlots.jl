@@ -19,7 +19,7 @@ df = DataFrame([i for i in data], Symbol.(colnames))
 end
 
 @testset "Advanced Manhattan Plot" begin
-    @time manhattan(df[:pval], df[:chr]; titles = "Manhattan Plot", dpi = 300, 
+    @time manhattan(df[!, :pval], df[!, :chr]; titles = "Manhattan Plot", dpi = 300, 
     ylabel = "expected", xlabel = "observed", outfile = "testmanhat.png",
     ymax = 20, linecolor = "green", signifline = 1e-7)
     @test isfile("testmanhat.png")
@@ -27,7 +27,7 @@ end
 end
 
 @testset "Advanced Manhattan Plot 2" begin
-    @time manhattan(df[:pval], df[:chr], df[:pos]; titles = "Manhattan Plot", dpi = 300, 
+    @time manhattan(df[!, :pval], df[!, :chr], df[!, :pos]; titles = "Manhattan Plot", dpi = 300, 
     ylabel = "expected", xlabel = "observed", outfile = "testmanhat2.png",
     ymax = 20, linecolor = "green", signifline = 1e-7, fontsize = 5pt)
     @test isfile("testmanhat2.png")
