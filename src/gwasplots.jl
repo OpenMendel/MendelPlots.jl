@@ -22,7 +22,7 @@ end
 # Position arguments
 
 - `df::DataFrame`: DataFrame containing pvalues to be used in the qqplot. Note: The column of the dataframe
-that indicates pvalues must be named pval (df[:pval] must exist)
+that indicates pvalues must be named pval (df[!, :pval] must exist)
 
 # Keyword arguments
 
@@ -99,8 +99,9 @@ function qq(pvalues::AbstractArray;
     λ = median(quantile.(Chisq(1), 1 .- pvalues) ./ quantile(Chisq(1), 0.5))
     
     pCI = layer(x = civals[:, 2], y = civals[:, 1], Geom.polygon(fill = true,
-        preserve_order = true), Theme(default_color = Colors.RGBA(0, 0, 0, 0.2),
-        panel_fill = nothing, grid_line_width = 0mm));
+    preserve_order = true), Theme(panel_fill = nothing, grid_line_width = 0mm,
+     lowlight_color = c -> RGB{Float32}(0.0, 0.0, 0.0), alphas = fill(0.2, N),
+     discrete_highlight_color = c -> RGB{Float32}(1.0, 1.0, 1.0)));
 
     pmain = layer(x = expect, y = obs, Geom.point, intercept=[0], slope = [1],
         Geom.abline(color = linecolor, style = :dash),
@@ -135,7 +136,7 @@ function qq(df::DataFrame; pvalvar::AbstractString = "pval", kwargs...)
         throw(ArgumentError(pvalvar * " is not in the dataframe. Please rename 
         the column of pvalues to `pval` or specify the correct name using the `pvalvar` argument"))
     end
-    qq(df[pvalsym]; kwargs...)
+    qq(df[!, pvalsym]; kwargs...)
 end
 
 
@@ -246,43 +247,43 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
          to specify the variable in the dataframe that uses basepairs.")
     end
 
-    df[:log10pval] = -log10.(df[pvalsym])
+    df[!, :log10pval] = -log10.(df[!, pvalsym])
     if ymax == 0
-        ymax = ceil(maximum(df[:log10pval])) + 2.5
+        ymax = ceil(maximum(df[!, :log10pval])) + 2.5
     end
     yticks = collect(0:2.5:ymax)
 
-    if typeof(df[chrsym][1]) != String
-        df[chrsym] = string.(df[chrsym])
-        xlabs = unique(df[chrsym])[1:2:end]
+    if typeof(df[!, chrsym][1]) != String
+        df[!, chrsym] = string.(df[!, chrsym])
+        xlabs = unique(df[!, chrsym])[1:2:end]
     else
-        xlabs = unique(df[chrsym])[1:2:end]
+        xlabs = unique(df[!, chrsym])[1:2:end]
     end
 
     if signifline == -1
-        signifline = -log10(0.05 / length(df[chrsym]))
+        signifline = -log10(0.05 / length(df[!, chrsym]))
     end
 
     if using_basepairs
         a = by(df, chrsym, max_pos = possym => maximum)
-        a[:bp_add] = cumsum(a[:max_pos]) - a[:max_pos]
+        a[!, :bp_add] = cumsum(a[!, :max_pos]) - a[!, :max_pos]
         df = join(df, a, on  = chrsym)
-        df[:adj_bp] = df[possym] .+ df[:bp_add]
-        xticks = by(df, chrsym, :adj_bp => d -> (maximum(d) + minimum(d))/2)[2][1:2:end]
-
+        df[!, :adj_bp] = df[!, possym] .+ df[!, :bp_add]
+        xticks = by(df, chrsym, :adj_bp => d -> (maximum(d) + minimum(d))/2)[!, 2][1:2:end]
+        #check 
         function convertlabsBP(i)
             return string.(xlabs)[findfirst(xticks .== i)]
         end
     else
         xticks = Vector{Float64}(undef, length(xlabs))
-        df[:SNPnumber] = collect(1:size(df)[1])
+        df[!, :SNPnumber] = collect(1:size(df)[1])
         global counter = 1
-        for i in parse.(Int64, unique(df[chrsym]))[1:2:end]
-            xticks[counter] = mean(df[:SNPnumber][df[chrsym] .== string.(i)])
+        for i in parse.(Int64, unique(df[!, chrsym]))[1:2:end]
+            xticks[counter] = mean(df[!, :SNPnumber][df[!, chrsym] .== string.(i)])
             global counter = counter + 1
         end
         function convertlabs(i)
-            return df[chrsym][findfirst(df[:SNPnumber] .== round(i))]
+            return df[!, chrsym][findfirst(df[!, :SNPnumber] .== round(i))]
         end
     end
 
@@ -290,7 +291,7 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
     
     #make the manhattan plot
     if using_basepairs
-        if length(unique(df[chrsym])) == 22
+        if length(unique(df[!, chrsym])) == 22
             plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrsym, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
                 intercept=[signifline], slope = [0], Guide.title(titles), 
@@ -314,7 +315,7 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
                 Scale.color_discrete; kwargs...);
         end
     else
-        if length(unique(df[chrsym])) == 22
+        if length(unique(df[!, chrsym])) == 22
             plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrsym, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabs),
                 intercept=[signifline], slope = [0], Guide.title(titles), 
