@@ -101,7 +101,8 @@ function qq(pvalues::AbstractArray;
     pCI = layer(x = civals[:, 2], y = civals[:, 1], Geom.polygon(fill = true,
     preserve_order = true), Theme(panel_fill = nothing, grid_line_width = 0mm,
      lowlight_color = c -> RGB{Float32}(0.0, 0.0, 0.0), alphas = fill(0.2, N),
-     discrete_highlight_color = c -> RGB{Float32}(1.0, 1.0, 1.0)));
+     discrete_highlight_color = c -> RGB{Float32}(1.0, 1.0, 1.0), 
+     line_width = 0mm));
 
     pmain = layer(x = expect, y = obs, Geom.point, intercept=[0], slope = [1],
         Geom.abline(color = linecolor, style = :dash),
