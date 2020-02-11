@@ -217,9 +217,7 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
     ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = 0,
     signifline::Union{Float64, Int64} = -1, linecolor::AbstractString = "deepskyblue1", fontsize = 15pt,
     pvalvar::AbstractString = "pval", chrvar::AbstractString = "chr", 
-    posvar::AbstractString = "pos", vertbars::AbstractString = "IHT", 
-    kwargs...
-    )
+    posvar::AbstractString = "pos", kwargs...)
 
     format = lowercase(split(outfile, ".")[end])
     if !(format in ["png", "pdf", "svg"])
@@ -250,12 +248,6 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
          to specify the variable in the dataframe that uses basepairs.")
     end
 
-    # plotting IHT result...
-    x_intercept = Int[]
-    if Symbol(vertbars) in names(df)
-        selected_snps = findall(df[!, Symbol(vertbars)])
-    end
-
     df[!, :log10pval] = -log10.(df[!, pvalsym])
     if ymax == 0
         ymax = ceil(maximum(df[!, :log10pval])) + 2.5
@@ -283,13 +275,6 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
         function convertlabsBP(i)
             return string.(xlabs)[findfirst(xticks .== i)]
         end
-
-        # for IHT, store position of vertical lines in variable x_intercept
-        if Symbol(vertbars) in names(df)
-            for i in selected_snps
-                push!(x_intercept, df[i, :adj_bp])
-            end
-        end
     else
         xticks = Vector{Float64}(undef, length(xlabs))
         df[!, :SNPnumber] = collect(1:size(df)[1])
@@ -303,17 +288,18 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
         end
     end
 
+
+    
     #make the manhattan plot
     if using_basepairs
         if length(unique(df[!, chrsym])) == 22
             plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrsym, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
                 intercept=[signifline], slope = [0], Guide.title(titles), 
-                xintercept=x_intercept, Geom.vline(size=[0.1mm], color=["black"]), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
                 Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
                 key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
-                major_label_font_size = fontsize), 
+                major_label_font_size = fontsize),
                 Guide.yticks(ticks = yticks), Scale.color_discrete_manual("#d54359", "#5ab543", 
                 "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
                 "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
@@ -323,7 +309,7 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
             plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrsym, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
                 intercept=[signifline], slope = [0], Guide.title(titles), 
-                Geom.abline(color = linecolor), Guide.ylabel(ylabel), 
+                Geom.abline(color = linecolor), Guide.ylabel(ylabel),
                 Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm, 
                 key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
                 major_label_font_size = fontsize), Guide.yticks(ticks = yticks), 
