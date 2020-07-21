@@ -76,6 +76,10 @@ function qq(pvalues::AbstractArray;
          outfile should end in .png, .pdf, or .svg (very slow)."))
     end
 
+    all(pvalues .>= 0.0) && all(pvalues .<= 1.0) || 
+    @error("P values that are not between 0 and 1 inputted.")
+
+
 
     N = length(pvalues)
     up = Array{Float64}(undef, N)
@@ -86,6 +90,7 @@ function qq(pvalues::AbstractArray;
     end
     up = sort!(up)
     obs = -log10.(sort(pvalues))
+    obs = clamp.(obs, 0.0, -log10(floatmin(0.0)))
     expect = -log10.(ppoints(length(pvalues)))
 
     civals = [low expect; up sort(expect)]
@@ -258,8 +263,11 @@ function manhattan(data::DataFrame;
          was not specified properly. To use BP position info, use the `posvar` argument
          to specify the variable in the dataframe that uses basepairs.")
     end
+    all(df[!, pvalvar] .>= 0.0) && all(df[!, pvalvar] .<= 1.0) || 
+    @error("Values that are not between 0 and 1 detected in $pvalvar column of $data" )
 
     df[!, :log10pval] = -log10.(df[!, pvalvar])
+    df[!, :log10pval] = clamp.(df[!, :log10pval], 0.0, -log10(floatmin(0.0)))
     if ymax == 0
         ymax = ceil(maximum(df[!, :log10pval])) + 2.5
     end
