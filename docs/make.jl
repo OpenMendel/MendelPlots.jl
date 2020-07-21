@@ -3,7 +3,7 @@ using Documenter, MendelPlots
 ENV["DOCUMENTER_DEBUG"] = "true"
 
 makedocs(
-    format = :html,
+    format = Documenter.HTML(),
     sitename = "MendelPlots",
     modules = [MendelPlots]
 )
