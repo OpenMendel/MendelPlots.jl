@@ -59,11 +59,15 @@ higher resolution. Default dpi is 350.
 function qq(pvalues::AbstractArray; 
     titles::AbstractString = "QQ Plot of GWAS p-values", 
     outfile::AbstractString = "qqplot.png",
-    dpi::Int64 = 350, xlabel::AbstractString = "Expected -log<sub>10</sub>(p)", 
+    dpi::Int64 = 350, 
+    xlabel::AbstractString = "Expected -log<sub>10</sub>(p)", 
     ylabel::AbstractString = "Observed -log<sub>10</sub>(p)", 
-    xmin::Union{Float64, Int64} = 0.0, ymin::Union{Float64, Int64} = 0.0, 
-    xmax::Union{Float64, Int64} = 0.0, ymax::Union{Float64, Int64} = 0.0,
-    linecolor::AbstractString = "red", dotcolor::AbstractString = "black", 
+    xmin::Union{Float64, Int64} = 0.0, 
+    ymin::Union{Float64, Int64} = 0.0, 
+    xmax::Union{Float64, Int64} = 0.0, 
+    ymax::Union{Float64, Int64} = 0.0,
+    linecolor::AbstractString = "red", 
+    dotcolor::AbstractString = "black", 
     fontsize = 15pt, kwargs...)
 
     format = lowercase(split(outfile, ".")[end])
@@ -132,12 +136,12 @@ end
 
 
 function qq(df::DataFrame; pvalvar::AbstractString = "pval", kwargs...)
-    pvalsym = Meta.parse(pvalvar)
-    if !(pvalsym in names(df))
-        throw(ArgumentError(pvalvar * " is not in the dataframe. Please rename 
+    pvalvar = Symbol(pvalvar)
+    if !(string(pvalvar) in names(df))
+        throw(ArgumentError(string(pvalvar) * " is not in the dataframe. Please rename 
         the column of pvalues to `pval` or specify the correct name using the `pvalvar` argument"))
     end
-    qq(df[!, pvalsym]; kwargs...)
+    qq(df[!, pvalvar]; kwargs...)
 end
 
 
@@ -211,13 +215,20 @@ is 'deepskyblue1'.
 
 - `posvar` variable indicating BP position column name (for dataframes only). Default is "pos". 
 """
-function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
+function manhattan(data::DataFrame;
+    titles::AbstractString = "Manhattan Plot",
     outfile::AbstractString = "manhattan.png",
-    dpi::Int64 = 350, xlabel::AbstractString = "Chromosome",
-    ylabel::AbstractString = "-log<sub>10</sub>(p)", ymax::Union{Float64, Int64} = 0,
-    signifline::Union{Float64, Int64} = -1, linecolor::AbstractString = "deepskyblue1", fontsize = 15pt,
-    pvalvar::AbstractString = "pval", chrvar::AbstractString = "chr", 
-    posvar::AbstractString = "pos", kwargs...)
+    dpi::Int64 = 350, 
+    xlabel::AbstractString = "Chromosome",
+    ylabel::AbstractString = "-log<sub>10</sub>(p)", 
+    ymax::Union{Float64, Int64} = 0,
+    signifline::Union{Float64, Int64} = -1,
+    linecolor::AbstractString = "deepskyblue1",
+    fontsize = 15pt,
+    pvalvar::Union{AbstractString, Symbol} = "pval",
+    chrvar::Union{AbstractString, Symbol} = "chr", 
+    posvar::Union{AbstractString, Symbol} = "pos",
+    kwargs...)
 
     format = lowercase(split(outfile, ".")[end])
     if !(format in ["png", "pdf", "svg"])
@@ -227,50 +238,50 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
 
     df = deepcopy(data) #so that the original dataframe isn't modified. 
 
-    pvalsym = Meta.parse(pvalvar)
-    chrsym = Meta.parse(chrvar)
-    possym = Meta.parse(posvar)
+    pvalvar = Symbol(pvalvar)
+    chrvar = Symbol(chrvar)
+    posvar = Symbol(posvar)
 
-    if !(pvalsym in names(df))
-        throw(ArgumentError(pvalvar * " is not in the dataframe. Please rename 
+    if !(string(pvalvar) in names(df))
+        throw(ArgumentError(string(pvalvar) * " is not in the dataframe. Please rename 
         the column of pvalues to `pval` or specify the correct name using the `pvalvar` argument"))
     end
 
-    if !(chrsym in names(df))
-        throw(ArgumentError(chrvar * " is not in the dataframe. Please rename 
+    if !(string(chrvar) in names(df))
+        throw(ArgumentError(string(chrvar) * " is not in the dataframe. Please rename 
         the column of chromsomes to `chr` or specify the correct name using the `chrvar` argument"))
     end
 
-    using_basepairs = possym in names(df)
+    using_basepairs = string(posvar) in names(df)
     if !using_basepairs
         println("No basepair information will be used as the basepair position variable
          was not specified properly. To use BP position info, use the `posvar` argument
          to specify the variable in the dataframe that uses basepairs.")
     end
 
-    df[!, :log10pval] = -log10.(df[!, pvalsym])
+    df[!, :log10pval] = -log10.(df[!, pvalvar])
     if ymax == 0
         ymax = ceil(maximum(df[!, :log10pval])) + 2.5
     end
     yticks = collect(0:2.5:ymax)
 
-    if typeof(df[!, chrsym][1]) != String
-        df[!, chrsym] = string.(df[!, chrsym])
-        xlabs = unique(df[!, chrsym])[1:2:end]
+    if typeof(df[!, chrvar][1]) != String
+        df[!, chrvar] = string.(df[!, chrvar])
+        xlabs = unique(df[!, chrvar])[1:2:end]
     else
-        xlabs = unique(df[!, chrsym])[1:2:end]
+        xlabs = unique(df[!, chrvar])[1:2:end]
     end
 
     if signifline == -1
-        signifline = -log10(0.05 / length(df[!, chrsym]))
+        signifline = -log10(0.05 / length(df[!, chrvar]))
     end
 
     if using_basepairs
-        a = by(df, chrsym, max_pos = possym => maximum)
+        a = combine(groupby(df, chrvar),  posvar => maximum => :max_pos)
         a[!, :bp_add] = cumsum(a[!, :max_pos]) - a[!, :max_pos]
-        df = join(df, a, on  = chrsym)
-        df[!, :adj_bp] = df[!, possym] .+ df[!, :bp_add]
-        xticks = by(df, chrsym, :adj_bp => d -> (maximum(d) + minimum(d))/2)[!, 2][1:2:end]
+        df = innerjoin(df, a, on  = chrvar)
+        df[!, :adj_bp] = df[!, posvar] .+ df[!, :bp_add]
+        xticks = combine(groupby(df, chrvar), :adj_bp => d -> (maximum(d) + minimum(d))/2)[!, 2][1:2:end]
         #check 
         function convertlabsBP(i)
             return string.(xlabs)[findfirst(xticks .== i)]
@@ -279,12 +290,12 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
         xticks = Vector{Float64}(undef, length(xlabs))
         df[!, :SNPnumber] = collect(1:size(df)[1])
         global counter = 1
-        for i in parse.(Int64, unique(df[!, chrsym]))[1:2:end]
-            xticks[counter] = mean(df[!, :SNPnumber][df[!, chrsym] .== string.(i)])
+        for i in parse.(Int64, unique(df[!, chrvar]))[1:2:end]
+            xticks[counter] = mean(df[!, :SNPnumber][df[!, chrvar] .== string.(i)])
             global counter = counter + 1
         end
         function convertlabs(i)
-            return df[!, chrsym][findfirst(df[!, :SNPnumber] .== round(i))]
+            return df[!, chrvar][findfirst(df[!, :SNPnumber] .== round(i))]
         end
     end
 
@@ -292,8 +303,8 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
     
     #make the manhattan plot
     if using_basepairs
-        if length(unique(df[!, chrsym])) == 22
-            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrsym, Geom.point,
+        if length(unique(df[!, chrvar])) == 22
+            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrvar, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
                 intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
@@ -306,7 +317,7 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
                 "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
                 "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"); kwargs...);
         else
-            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrsym, Geom.point,
+            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrvar, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
                 intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
@@ -316,8 +327,8 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
                 Scale.color_discrete; kwargs...);
         end
     else
-        if length(unique(df[!, chrsym])) == 22
-            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrsym, Geom.point,
+        if length(unique(df[!, chrvar])) == 22
+            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrvar, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabs),
                 intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
@@ -330,7 +341,7 @@ function manhattan(data::DataFrame; titles::AbstractString = "Manhattan Plot",
                 "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
                 "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"); kwargs...);
         else
-            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrsym, Geom.point,
+            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrvar, Geom.point,
                 Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabs),
                 intercept=[signifline], slope = [0], Guide.title(titles), 
                 Geom.abline(color = linecolor), Guide.ylabel(ylabel),
