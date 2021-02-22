@@ -219,6 +219,10 @@ is 'deepskyblue1'.
 - `chrvar` variable indicating chromosome column name (for dataframes only). Default is "chr". 
 
 - `posvar` variable indicating BP position column name (for dataframes only). Default is "pos". 
+
+- `annotatevar` variable indicating annotation column name (for dataframes only). Default is "gene". 
+
+- `annotateinds` indicies of rows to include as annotation for the manhattan plot. Default is `nothing`. 
 """
 function manhattan(data::DataFrame;
     titles::AbstractString = "Manhattan Plot",
@@ -233,6 +237,8 @@ function manhattan(data::DataFrame;
     pvalvar::Union{AbstractString, Symbol} = "pval",
     chrvar::Union{AbstractString, Symbol} = "chr", 
     posvar::Union{AbstractString, Symbol} = "pos",
+    annotatevar::Union{AbstractString, Symbol} = "gene",
+    annotateinds::Union{Nothing, AbstractVector{<:Integer}} = nothing,
     kwargs...)
 
     format = lowercase(split(outfile, ".")[end])
@@ -246,6 +252,7 @@ function manhattan(data::DataFrame;
     pvalvar = Symbol(pvalvar)
     chrvar = Symbol(chrvar)
     posvar = Symbol(posvar)
+    annotatevar = Symbol(annotatevar)
 
     if !(string(pvalvar) in names(df))
         throw(ArgumentError(string(pvalvar) * " is not in the dataframe. Please rename 
@@ -257,12 +264,18 @@ function manhattan(data::DataFrame;
         the column of chromsomes to `chr` or specify the correct name using the `chrvar` argument"))
     end
 
+    if !isnothing(annotateinds)
+        @assert annotatevar in propertynames(df)  "$(string(annotatevar)) is not in the dataframe. Please rename 
+        the column of annotations to `gene` or specify the correct name using the `annotatevar` argument"
+    end
+
     using_basepairs = string(posvar) in names(df)
     if !using_basepairs
         println("No basepair information will be used as the basepair position variable
          was not specified properly. To use BP position info, use the `posvar` argument
          to specify the variable in the dataframe that uses basepairs.")
     end
+
     all(df[!, pvalvar] .>= 0.0) && all(df[!, pvalvar] .<= 1.0) || 
     @error("Values that are not between 0 and 1 detected in $pvalvar column of $data" )
 
@@ -311,60 +324,148 @@ function manhattan(data::DataFrame;
     
     #make the manhattan plot
     if using_basepairs
-        if length(unique(df[!, chrvar])) == 22
-            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrvar, Geom.point,
-                Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
-                intercept=[signifline], slope = [0], Guide.title(titles), 
-                Geom.abline(color = linecolor), Guide.ylabel(ylabel),
+        plt1 = layer(df, x = :adj_bp, y = :log10pval, color = chrvar, Geom.point,
+                intercept=[signifline], slope = [0], 
+                Geom.abline(color = linecolor), 
                 Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
                 key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
-                major_label_font_size = fontsize),
-                Guide.yticks(ticks = yticks), Scale.color_discrete_manual("#d54359", "#5ab543", 
-                "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
-                "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
-                "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
-                "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"); kwargs...);
-        else
-            plt1 = plot(df, x = :adj_bp, y = :log10pval, color = chrvar, Geom.point,
-                Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabsBP),
-                intercept=[signifline], slope = [0], Guide.title(titles), 
-                Geom.abline(color = linecolor), Guide.ylabel(ylabel),
-                Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm, 
-                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
-                major_label_font_size = fontsize), Guide.yticks(ticks = yticks), 
-                Scale.color_discrete; kwargs...);
+                major_label_font_size = fontsize));
+        if !isnothing(annotateinds)
+            plt_annotate = layer(df[annotateinds, :], x = :adj_bp, y = :log10pval, 
+                Geom.point, Geom.label, label = annotatevar,
+                color = [colorant"black"], Theme(point_size = 0.8mm,
+                highlight_width = 0mm))
+        end
+        if length(unique(df[!, chrvar])) == 22
+            if isnothing(annotateinds)
+                mhplot = plot(plt1,
+                    Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), 
+                    Scale.x_continuous(labels = convertlabsBP), Guide.ylabel(ylabel),
+                    Guide.yticks(ticks = yticks), Guide.title(titles),
+                    Scale.color_discrete_manual("#d54359", "#5ab543", 
+                    "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
+                    "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
+                    "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
+                    "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"),
+                    Theme(key_position = :none,
+                    grid_line_width = 0mm, 
+                    panel_stroke = colorant"black",
+                    major_label_font_size = fontsize, 
+                    panel_fill = nothing); kwargs...);
+            else
+                mhplot = plot(plt1, plt_annotate,
+                    Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), 
+                    Scale.x_continuous(labels = convertlabsBP), Guide.ylabel(ylabel),
+                    Guide.yticks(ticks = yticks), Guide.title(titles),
+                    Scale.color_discrete_manual("#d54359", "#5ab543", 
+                    "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
+                    "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
+                    "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
+                    "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"),
+                    Theme(key_position = :none,
+                    grid_line_width = 0mm, 
+                    panel_stroke = colorant"black",
+                    major_label_font_size = fontsize, 
+                    panel_fill = nothing); kwargs...);
+            end
+        else #more than 22 chr, use default coloring
+            if isnothing(annotateinds)
+                mhplot = plot(plt1,
+                    Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Guide.title(titles),
+                    Scale.x_continuous(labels = convertlabsBP), Guide.ylabel(ylabel),
+                    Guide.yticks(ticks = yticks), Scale.color_discrete,
+                    Theme(key_position = :none,
+                    grid_line_width = 0mm, 
+                    panel_stroke = colorant"black",
+                    major_label_font_size = fontsize, 
+                    panel_fill = nothing); kwargs...);
+            else
+                mhplot = plot(plt1, plt_annotate,
+                    Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Guide.title(titles),
+                    Scale.x_continuous(labels = convertlabsBP), Guide.ylabel(ylabel),
+                    Guide.yticks(ticks = yticks), Scale.color_discrete,
+                    Theme(key_position = :none,
+                    grid_line_width = 0mm, 
+                    panel_stroke = colorant"black",
+                    major_label_font_size = fontsize, 
+                    panel_fill = nothing); kwargs...);
+            end
         end
     else
-        if length(unique(df[!, chrvar])) == 22
-            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrvar, Geom.point,
-                Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabs),
-                intercept=[signifline], slope = [0], Guide.title(titles), 
-                Geom.abline(color = linecolor), Guide.ylabel(ylabel),
+        plt1 = layer(df, x = :SNPnumber, y = :log10pval, color = chrvar, Geom.point,
+                intercept=[signifline], slope = [0], 
+                Geom.abline(color = linecolor), 
                 Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm,
                 key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
-                major_label_font_size = fontsize),
-                Guide.yticks(ticks = yticks), Scale.color_discrete_manual("#d54359", "#5ab543", 
-                "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
-                "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
-                "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
-                "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"); kwargs...);
-        else
-            plt1 = plot(df, x = :SNPnumber, y = :log10pval, color = chrvar, Geom.point,
-                Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Scale.x_continuous(labels = convertlabs),
-                intercept=[signifline], slope = [0], Guide.title(titles), 
-                Geom.abline(color = linecolor), Guide.ylabel(ylabel),
-                Theme(panel_fill = nothing, highlight_width = 0mm, point_size = 0.5mm, 
-                key_position = :none, grid_line_width = 0mm, panel_stroke = colorant"black",
-                major_label_font_size = fontsize),
-                Guide.yticks(ticks = yticks), Scale.color_discrete; kwargs...);
+                major_label_font_size = fontsize));
+        if !isnothing(annotateinds)
+            plt_annotate = layer(df[annotateinds, :], x = :SNPnumber, y = :log10pval, 
+                Geom.point, Geom.label, label = annotatevar,
+                color = [colorant"black"], Theme(point_size = 0.85mm,
+                highlight_width = 0mm))
+        end
+        if length(unique(df[!, chrvar])) == 22
+            if isnothing(annotateinds)
+                mhplot = plot(plt1,
+                    Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), 
+                    Scale.x_continuous(labels = convertlabs), Guide.ylabel(ylabel),
+                    Guide.yticks(ticks = yticks), Guide.title(titles),
+                    Scale.color_discrete_manual("#d54359", "#5ab543", 
+                    "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
+                    "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
+                    "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
+                    "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"),
+                    Theme(key_position = :none,
+                    grid_line_width = 0mm, 
+                    panel_stroke = colorant"black",
+                    major_label_font_size = fontsize, 
+                    panel_fill = nothing); kwargs...);
+            else
+                mhplot = plot(plt1, plt_annotate,
+                    Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), 
+                    Scale.x_continuous(labels = convertlabs), Guide.ylabel(ylabel),
+                    Guide.yticks(ticks = yticks), Guide.title(titles),
+                    Scale.color_discrete_manual("#d54359", "#5ab543", 
+                    "#a162dc", "#a9b245", "#5861cf", "#d89c39", "#6e8be3",
+                    "#c7522a", "#5ea1d5", "#dd418d", "#66b974", "#9c41a3",
+                    "#5a7936", "#df6cce", "#48b5a3", "#aa4584", "#997134", 
+                    "#655fa0", "#dd8a69", "#bf8cd3", "#a24b5e", "#df83a3"),
+                    Theme(key_position = :none,
+                    grid_line_width = 0mm, 
+                    panel_stroke = colorant"black",
+                    major_label_font_size = fontsize, 
+                    panel_fill = nothing); kwargs...);
+            end
+        else #more than 22 chr, use default coloring
+            if isnothing(annotateinds)
+                mhplot = plot(plt1,
+                    Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Guide.title(titles),
+                    Scale.x_continuous(labels = convertlabs), Guide.ylabel(ylabel),
+                    Guide.yticks(ticks = yticks), Scale.color_discrete,
+                    Theme(key_position = :none,
+                    grid_line_width = 0mm, 
+                    panel_stroke = colorant"black",
+                    major_label_font_size = fontsize, 
+                    panel_fill = nothing); kwargs...);
+            else
+                mhplot = plot(plt1, plt_annotate,
+                    Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Guide.title(titles),
+                    Scale.x_continuous(labels = convertlabs), Guide.ylabel(ylabel),
+                    Guide.yticks(ticks = yticks), Scale.color_discrete,
+                    Theme(key_position = :none,
+                    grid_line_width = 0mm, 
+                    panel_stroke = colorant"black",
+                    major_label_font_size = fontsize, 
+                    panel_fill = nothing); kwargs...);
+            end
         end
     end
     if format == "png"
-        draw(PNG(outfile, 6inch, 4inch, dpi = dpi), plt1);
+        draw(PNG(outfile, 6inch, 4inch, dpi = dpi), mhplot);
     elseif format == "pdf"
-        draw(PDF(outfile, 6inch, 4inch, dpi = dpi), plt1);
+        draw(PDF(outfile, 6inch, 4inch, dpi = dpi), mhplot);
     elseif format == "svg"
-        draw(SVG(outfile, 6inch, 4inch), plt1);
+        draw(SVG(outfile, 6inch, 4inch), mhplot);
     else
         throw(ArgumentError("This should not display. Please report format issue."))
     end

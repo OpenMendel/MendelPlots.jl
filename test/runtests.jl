@@ -34,6 +34,23 @@ end
     rm("testmanhat2.png")
 end
 
+@testset "Manhattan Annotation" begin
+    @time manhattan(df;  
+    annotateinds = [4380
+    5470
+    6722
+    7374
+   12061
+    4936
+   14978
+    7481],
+    titles = "Manhattan Plot", dpi = 300, 
+    outfile = "testmanhat2.png",
+    linecolor = "red", signifline = -log10(1e-5), fontsize = 15pt)
+    @test isfile("testmanhat2.png")
+    rm("testmanhat2.png")
+end
+
 @testset "Basic QQ Plots" begin
     @time qq(df; titles = "QQ Plot", outfile = "qqplot.svg")
     @time qq(df; titles = "QQ Plot", outfile = "qqplot.pdf")

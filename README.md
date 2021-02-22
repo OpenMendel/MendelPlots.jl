@@ -38,3 +38,4 @@ bug or request a feature.
 
 <img src="docs/qqplot.png">
 <img src="docs/manhattan.png">
+<img src="docs/annotated_manhattan.png">
