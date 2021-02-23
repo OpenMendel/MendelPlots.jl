@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 2 * * *'  # Daily at 2 AM UTC (8 PM CST)
   push:
-    branches: [main]
+    branches: [master]
     tags: ["*"]
   pull_request:
   workflow_dispatch:
