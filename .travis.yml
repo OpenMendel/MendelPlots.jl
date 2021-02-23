@@ -23,12 +23,3 @@ after_success:
 jobs:
   allow_failures:
     - julia: nightly
-  include:
-    - stage: "Documentation"
-      julia: 1.5
-      os: linux
-      script:
-        - julia -e 'using Pkg; Pkg.add("Documenter")'
-        - julia -e 'using MendelPlots; include(joinpath(dirname(pathof(MendelPlots)), "..", "docs", "make.jl"))'
-      after_script: skip
-      after_success: skip
