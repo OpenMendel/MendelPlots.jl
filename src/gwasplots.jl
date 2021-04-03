@@ -333,8 +333,8 @@ function manhattan(data::DataFrame;
         if !isnothing(annotateinds)
             plt_annotate = layer(df[annotateinds, :], x = :adj_bp, y = :log10pval, 
                 Geom.point, Geom.label, label = annotatevar,
-                color = [colorant"black"], Theme(point_size = 0.8mm,
-                highlight_width = 0mm))
+                color = [colorant"black"], Theme(discrete_highlight_color = identity,
+                point_size = 0.6mm, point_shapes=[Shape.circle], alphas=[0.0]))
         end
         if length(unique(df[!, chrvar])) == 22
             if isnothing(annotateinds)
@@ -353,7 +353,7 @@ function manhattan(data::DataFrame;
                     major_label_font_size = fontsize, 
                     panel_fill = nothing); kwargs...);
             else
-                mhplot = plot(plt1, plt_annotate,
+                mhplot = plot(plt_annotate, plt1,
                     Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), 
                     Scale.x_continuous(labels = convertlabsBP), Guide.ylabel(ylabel),
                     Guide.yticks(ticks = yticks), Guide.title(titles),
@@ -380,7 +380,7 @@ function manhattan(data::DataFrame;
                     major_label_font_size = fontsize, 
                     panel_fill = nothing); kwargs...);
             else
-                mhplot = plot(plt1, plt_annotate,
+                mhplot = plot(plt_annotate, plt1,
                     Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Guide.title(titles),
                     Scale.x_continuous(labels = convertlabsBP), Guide.ylabel(ylabel),
                     Guide.yticks(ticks = yticks), Scale.color_discrete,
@@ -421,7 +421,7 @@ function manhattan(data::DataFrame;
                     major_label_font_size = fontsize, 
                     panel_fill = nothing); kwargs...);
             else
-                mhplot = plot(plt1, plt_annotate,
+                mhplot = plot(plt_annotate, plt1,
                     Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), 
                     Scale.x_continuous(labels = convertlabs), Guide.ylabel(ylabel),
                     Guide.yticks(ticks = yticks), Guide.title(titles),
@@ -448,7 +448,7 @@ function manhattan(data::DataFrame;
                     major_label_font_size = fontsize, 
                     panel_fill = nothing); kwargs...);
             else
-                mhplot = plot(plt1, plt_annotate,
+                mhplot = plot(plt_annotate, plt1,
                     Guide.xticks(ticks = xticks), Guide.xlabel(xlabel), Guide.title(titles),
                     Scale.x_continuous(labels = convertlabs), Guide.ylabel(ylabel),
                     Guide.yticks(ticks = yticks), Scale.color_discrete,
