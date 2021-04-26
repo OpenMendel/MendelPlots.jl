@@ -11,7 +11,7 @@ MendelPlots.jl is a Julia package for generating common plots from results of ge
 
 **MendelPlots** is a plotting and data visualization system written in [Julia](http://julialang.org/). It uses [Gadfly](https://github.com/GiovineItalia/Gadfly.jl) as the backend, which is influenced by Grammar of Graphics Style programming and Hadley Wickham's [ggplot2](http://ggplot2.org/)
 
-*MendelPlots.jl* is not registered yet. To install the package run:
+*MendelPlots.jl* is not registered yet. To install the package, enter the package REPL by hitting the `]` key and run:
 ```{julia}
 pkg> add https://github.com/OpenMendel/MendelPlots.jl.git
 ```
@@ -20,7 +20,7 @@ pkg> add https://github.com/OpenMendel/MendelPlots.jl.git
 
 If you use [OpenMendel](https://openmendel.github.io) analysis packages in your research, please cite the following reference in the resulting publications:
 
-*Lange K, Papp JC, Sinsheimer JS, Sripracha R, Zhou H, Sobel EM (2013) Mendel: The Swiss army knife of genetic analysis programs. Bioinformatics 29:1568-1570.*
+*OPENMENDEL: a cooperative programming project for statistical genetics. Zhou H, Sinsheimer JS, Bates DM, Chu BB, German CA, Ji SS, Keys KL, Kim J, Ko S, Mosher GD, Papp JC, Sobel EM, Zhai J, Zhou JJ, Lange K. Hum Genet. 2019 Mar 26. doi: 10.1007/s00439-019-02001-z. [Epub ahead of print] PMID: 30915546*
 
 
 ## Package features

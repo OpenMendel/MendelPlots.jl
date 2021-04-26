@@ -206,6 +206,8 @@ larger file with higher resolution. Default dpi is 350.
 - `ymax::Union{Float64, Int64}`: Specified maximum y value to represent 
 on the plot
 
+- `ystep`: Step-size for y-axis label ticks. Default value is 2.5
+
 - `signifline::Union{Float64, Int64}`: Line to draw significance at. 
 Default in Bonferonni corrected p-value for α = 0.05. 
 
@@ -231,6 +233,7 @@ function manhattan(data::DataFrame;
     xlabel::AbstractString = "Chromosome",
     ylabel::AbstractString = "-log<sub>10</sub>(p)", 
     ymax::Union{Float64, Int64} = 0,
+    ystep::Union{Float64, Int64} = 2.5,
     signifline::Union{Float64, Int64} = -1,
     linecolor::AbstractString = "deepskyblue1",
     fontsize = 15pt,
@@ -284,7 +287,7 @@ function manhattan(data::DataFrame;
     if ymax == 0
         ymax = ceil(maximum(df[!, :log10pval])) + 2.5
     end
-    yticks = collect(0:2.5:ymax)
+    yticks = collect(0:ystep:ymax)
 
     if typeof(df[!, chrvar][1]) != String
         df[!, chrvar] = string.(df[!, chrvar])
