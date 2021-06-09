@@ -51,6 +51,8 @@ higher resolution. Default dpi is 350.
 
 - `ystep`: Step-size for y-axis label ticks. Default value is 2.
 
+- `gifdist`: Distance from right edge to print the genomic inflation factor `λ`. Default is 1.0.
+
 - `linecolor::AbstractString`: Color of "normal" line. Default color is "red". 
 
 - `dotcolor::AbstractString`: Color of the dots. Default color is "black". 
@@ -72,6 +74,7 @@ function qq(pvalues::AbstractArray;
     ymax::Union{Float64, Int64} = 0.0,
     xstep::Union{Float64, Int64} = 1,
     ystep::Union{Float64, Int64} = 2,
+    gifdist::Union{Float64, Int64} = 1.0,
     linecolor::AbstractString = "red", 
     dotcolor::AbstractString = "black", 
     fontsize = 15pt, kwargs...)
@@ -109,7 +112,7 @@ function qq(pvalues::AbstractArray;
     end
     xticks = collect(xmin:xstep:xmax)
     yticks = collect(ymin:ystep:nearestEven(ymax))
-    xλ = xmax - 1.0
+    xλ = xmax - gifdist
     #calculate genomic inflation factor
     λ = cquantile(Chisq(1), median(pvalues)) / quantile(Chisq(1), 0.5)
     pCI = layer(x = civals[:, 2], y = civals[:, 1], Geom.polygon(fill = true,
