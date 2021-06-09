@@ -47,6 +47,10 @@ higher resolution. Default dpi is 350.
 
 - `ymax::Union{Float64, Int64}`: Specified maximum y value to represent on the plot
 
+- `xstep`: Step-size for x-axis label ticks. Default value is 1.
+
+- `ystep`: Step-size for y-axis label ticks. Default value is 2.
+
 - `linecolor::AbstractString`: Color of "normal" line. Default color is "red". 
 
 - `dotcolor::AbstractString`: Color of the dots. Default color is "black". 
@@ -66,6 +70,8 @@ function qq(pvalues::AbstractArray;
     ymin::Union{Float64, Int64} = 0.0, 
     xmax::Union{Float64, Int64} = 0.0, 
     ymax::Union{Float64, Int64} = 0.0,
+    xstep::Union{Float64, Int64} = 1,
+    ystep::Union{Float64, Int64} = 2,
     linecolor::AbstractString = "red", 
     dotcolor::AbstractString = "black", 
     fontsize = 15pt, kwargs...)
@@ -101,12 +107,11 @@ function qq(pvalues::AbstractArray;
     if ymax == 0.0
         ymax = ceil(maximum(obs))
     end
-    xticks = collect(xmin:xmax)
-    yticks = collect(ymin:2:nearestEven(ymax))
+    xticks = collect(xmin:xstep:xmax)
+    yticks = collect(ymin:ystep:nearestEven(ymax))
     xλ = xmax - 1.0
     #calculate genomic inflation factor
-    λ = median(quantile.(Chisq(1), 1 .- pvalues) ./ quantile(Chisq(1), 0.5))
-    
+    λ = cquantile(Chisq(1), median(pvalues)) / quantile(Chisq(1), 0.5)
     pCI = layer(x = civals[:, 2], y = civals[:, 1], Geom.polygon(fill = true,
     preserve_order = true), Theme(panel_fill = nothing, grid_line_width = 0mm,
      lowlight_color = c -> RGB{Float32}(0.0, 0.0, 0.0), alphas = fill(0.2, N),
