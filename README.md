@@ -11,9 +11,11 @@ MendelPlots.jl is a Julia package for generating common plots from results of ge
 
 **MendelPlots** is a plotting and data visualization system written in [Julia](http://julialang.org/). It uses [Gadfly](https://github.com/GiovineItalia/Gadfly.jl) as the backend, which is influenced by Grammar of Graphics Style programming and Hadley Wickham's [ggplot2](http://ggplot2.org/)
 
-*MendelPlots.jl* is not registered yet. To install the package, enter the package REPL by hitting the `]` key and run:
-```{julia}
-pkg> add https://github.com/OpenMendel/MendelPlots.jl.git
+
+This package is registered in the default Julia package registry, and can be installed through standard package installation procedure: e.g., running the following code in Julia REPL.
+```julia
+using Pkg
+pkg"add MendelPlots"
 ```
 
 ## Citation
